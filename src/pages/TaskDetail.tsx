@@ -139,39 +139,32 @@ const TaskDetail = () => {
                   Complete the previous tasks to unlock this step
                 </p>
               </div>
-            ) : (
+            ) : task.downloadable_documents && task.downloadable_documents.length > 0 ? (
               /* Two Column Layout - Document Download & Upload */
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
                 {/* Left Side - Document to Download */}
                 <div className="bg-card rounded-xl shadow-sm border border-border p-8">
-                  <h2 className="text-xl font-serif font-bold text-foreground mb-6">Required Documents</h2>
+                  <h2 className="text-xl font-serif font-bold text-foreground mb-6">Documents to Download</h2>
                   
-                  {task.required_documents && task.required_documents.length > 0 ? (
-                    <div className="space-y-4">
-                      {task.required_documents.map((doc, idx) => (
-                        <div key={idx} className="bg-muted/30 rounded-lg p-6 text-center">
-                          <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <FileText className="w-8 h-8 text-primary" />
-                          </div>
-                          <h3 className="font-serif text-lg text-foreground mb-2">
-                            {doc}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-4">2.4 MB</p>
-                          
-                          <button className="w-full px-6 py-3 bg-background hover:bg-accent border-2 border-border rounded-lg font-medium text-foreground transition-colors flex items-center justify-center gap-2">
-                            <Download className="w-4 h-4" />
-                            DOWNLOAD & SIGN
-                          </button>
+                  <div className="space-y-4">
+                    {task.downloadable_documents.map((doc, idx) => (
+                      <div key={idx} className="bg-muted/30 rounded-lg p-6 text-center">
+                        <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                          <FileText className="w-8 h-8 text-primary" />
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="bg-muted/30 rounded-lg p-8 text-center">
-                      <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">No documents required for download</p>
-                    </div>
-                  )}
+                        <h3 className="font-serif text-lg text-foreground mb-2">
+                          {doc}
+                        </h3>
+                        <p className="text-sm text-muted-foreground mb-4">2.4 MB</p>
+                        
+                        <button className="w-full px-6 py-3 bg-background hover:bg-accent border-2 border-border rounded-lg font-medium text-foreground transition-colors flex items-center justify-center gap-2">
+                          <Download className="w-4 h-4" />
+                          DOWNLOAD & SIGN
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Right Side - Upload Area */}
@@ -212,6 +205,61 @@ const TaskDetail = () => {
                       Supported formats: PDF, DOC, DOCX, JPG, PNG
                     </p>
                   </div>
+                </div>
+              </div>
+            ) : (
+              /* Upload Only - No Downloadable Documents */
+              <div className="bg-card rounded-xl shadow-sm border border-border p-8">
+                <h2 className="text-xl font-serif font-bold text-foreground mb-6">Upload Documents</h2>
+                
+                {task.required_documents && task.required_documents.length > 0 && (
+                  <div className="mb-6">
+                    <p className="text-sm text-muted-foreground mb-3">Required documents:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {task.required_documents.map((doc, idx) => (
+                        <span
+                          key={idx}
+                          className="px-3 py-1.5 bg-primary/10 text-primary text-sm rounded-full font-medium"
+                        >
+                          {doc}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  className={`border-2 border-dashed rounded-xl p-12 text-center transition-all min-h-[300px] flex flex-col items-center justify-center ${
+                    isDragging 
+                      ? "border-primary bg-primary/5" 
+                      : "border-border hover:border-primary/50 hover:bg-accent/50"
+                  }`}
+                >
+                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                    <Upload className="w-8 h-8 text-primary" />
+                  </div>
+                  
+                  <p className="text-muted-foreground mb-6">
+                    Drag and drop files here, or click to browse
+                  </p>
+                  
+                  <label className="inline-flex items-center px-8 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg cursor-pointer transition-colors font-medium">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Choose Files
+                    <input
+                      type="file"
+                      multiple
+                      onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                      className="hidden"
+                    />
+                  </label>
+
+                  <p className="text-xs text-muted-foreground mt-4">
+                    Supported formats: PDF, DOC, DOCX, JPG, PNG
+                  </p>
                 </div>
               </div>
             )}

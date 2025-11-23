@@ -37,6 +37,9 @@ const AdminDashboard = () => {
       if (error) throw error;
       return data;
     },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
     retry: 1,
   });
 
@@ -177,12 +180,15 @@ const AdminDashboard = () => {
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 
-                        className="font-semibold cursor-pointer hover:text-primary transition-colors"
-                        onClick={() => navigate(`/admin/cases/${caseItem.id}`)}
+                      <button 
+                        className="font-semibold hover:text-primary transition-colors text-left"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/admin/cases/${caseItem.id}`);
+                        }}
                       >
                         {caseItem.case_reference}
-                      </h3>
+                      </button>
                       {!caseItem.client_id && (
                         <Badge variant="outline">Pending Invite</Badge>
                       )}

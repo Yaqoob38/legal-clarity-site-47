@@ -11,12 +11,12 @@ export const useCase = () => {
     queryFn: async () => {
       if (!user?.id) return null;
       
-      console.log("Fetching case for user:", user.id);
-      
       const { data, error } = await supabase
         .from("cases")
         .select("*")
         .eq("client_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error) {
@@ -24,12 +24,9 @@ export const useCase = () => {
         throw error;
       }
       
-      console.log("User case data:", data);
       return data;
     },
     enabled: !!user?.id,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
   });
 
   const updateCase = useMutation({

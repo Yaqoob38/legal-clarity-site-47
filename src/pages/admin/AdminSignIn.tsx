@@ -21,11 +21,15 @@ const AdminSignIn = () => {
 
     try {
       const { error } = await signIn(email, password);
-      if (!error) {
-        // Wait a moment then check if user is admin
-        await new Promise(resolve => setTimeout(resolve, 500));
-        navigate("/admin/dashboard");
+      if (error) {
+        toast.error(error.message);
+        setLoading(false);
+        return;
       }
+      
+      // Wait a moment for auth state to update
+      await new Promise(resolve => setTimeout(resolve, 500));
+      navigate("/admin/dashboard");
     } catch (error: any) {
       toast.error("An error occurred during sign in");
     } finally {

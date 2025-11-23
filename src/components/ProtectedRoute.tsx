@@ -1,28 +1,20 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useAdmin } from "@/hooks/useAdmin";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading: authLoading } = useAuth();
-  const { isAdmin, isLoading: adminLoading } = useAdmin();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const loading = authLoading || adminLoading;
 
   useEffect(() => {
-    if (!authLoading && !adminLoading) {
-      if (!user) {
-        navigate("/signin");
-      } else if (isAdmin) {
-        // Redirect admins to admin dashboard
-        navigate("/admin/dashboard");
-      }
+    if (!loading && !user) {
+      navigate("/signin");
     }
-  }, [user, isAdmin, authLoading, adminLoading, navigate]);
+  }, [user, loading, navigate]);
 
   if (loading) {
     return (

@@ -29,27 +29,42 @@ const AdminSignup = () => {
         return;
       }
 
-      // Wait a moment for the user to be created
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait for user creation and get the session
+      let retries = 0;
+      let user = null;
+      
+      while (retries < 10 && !user) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        user = currentUser;
+        retries++;
+      }
+
+      if (!user) {
+        toast.error("Failed to get user information");
+        setLoading(false);
+        return;
+      }
 
       // Assign admin role
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { error: roleError } = await supabase.from("user_roles").insert({
-          user_id: user.id,
-          role: "admin",
-        });
-        
-        if (roleError) {
-          toast.error("Failed to assign admin role");
-          setLoading(false);
-          return;
-        }
+      const { error: roleError } = await supabase.from("user_roles").insert({
+        user_id: user.id,
+        role: "admin",
+      });
+      
+      if (roleError) {
+        console.error("Role assignment error:", roleError);
+        toast.error("Failed to assign admin role: " + roleError.message);
+        setLoading(false);
+        return;
       }
       
       toast.success("Admin account created successfully!");
+      // Wait a bit more to ensure role is fully saved
+      await new Promise(resolve => setTimeout(resolve, 500));
       navigate("/admin/dashboard");
     } catch (error: any) {
+      console.error("Signup error:", error);
       toast.error("An error occurred during sign up");
     } finally {
       setLoading(false);

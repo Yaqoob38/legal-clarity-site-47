@@ -1,6 +1,7 @@
-import { Bell, Home, FileText, ArrowRight, UploadCloud, Upload, Check, MoreHorizontal, ChevronRight, ChevronDown, LayoutGrid, List, ArrowLeft, Edit2, Trash2, Plus, CheckCircle, XCircle, Unlock } from "lucide-react";
+import { Bell, Home, FileText, ArrowRight, UploadCloud, Upload, Check, MoreHorizontal, ChevronRight, ChevronDown, LayoutGrid, List, ArrowLeft, Edit2, Trash2, Plus, CheckCircle, XCircle, Unlock, Download, Eye } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAdminCase } from "@/hooks/useAdminCase";
+import { useAdminDocuments } from "@/hooks/useAdminDocuments";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -44,7 +45,10 @@ const AdminCaseDetail = () => {
   console.log("📋 AdminCaseDetail - caseId:", caseId);
   
   const { caseData, tasks, isLoading, getTasksByStage } = useAdminCase(caseId);
+  const { documents, getDocumentsByTask, approveDocument, deleteDocument } = useAdminDocuments(caseId);
   const [addTaskDialog, setAddTaskDialog] = useState(false);
+  const [viewDocsDialog, setViewDocsDialog] = useState(false);
+  const [selectedTaskForDocs, setSelectedTaskForDocs] = useState<any>(null);
   const [editTaskDialog, setEditTaskDialog] = useState(false);
   const [deleteTaskDialog, setDeleteTaskDialog] = useState(false);
   const [selectedTask, setSelectedTask] = useState<any>(null);
@@ -200,7 +204,7 @@ const AdminCaseDetail = () => {
   console.log("📝 Tasks:", tasks?.length);
   
   const clientName = caseData?.client_id 
-    ? ((caseData as any)?.profiles?.full_name || "Unknown Client")
+    ? ((caseData as any)?.client_name || "Unknown Client")
     : (caseData?.client_email ? `Invited: ${caseData.client_email}` : "No Client");
 
   return (
@@ -395,6 +399,18 @@ const AdminCaseDetail = () => {
                       )}
                       <Button
                         size="sm"
+                        variant="outline"
+                        className="text-xs h-7 px-2"
+                        onClick={() => {
+                          setSelectedTaskForDocs(task);
+                          setViewDocsDialog(true);
+                        }}
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        Docs ({getDocumentsByTask(task.id).length})
+                      </Button>
+                      <Button
+                        size="sm"
                         variant="ghost"
                         className="text-xs h-7 px-2"
                         onClick={() => handleEditTask(task)}
@@ -490,6 +506,18 @@ const AdminCaseDetail = () => {
                       )}
                       <Button
                         size="sm"
+                        variant="outline"
+                        className="text-xs h-7 px-2"
+                        onClick={() => {
+                          setSelectedTaskForDocs(task);
+                          setViewDocsDialog(true);
+                        }}
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        Docs ({getDocumentsByTask(task.id).length})
+                      </Button>
+                      <Button
+                        size="sm"
                         variant="ghost"
                         className="text-xs h-7 px-2"
                         onClick={() => handleEditTask(task)}
@@ -583,6 +611,18 @@ const AdminCaseDetail = () => {
                             Unlock
                           </Button>
                         )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs h-7 px-2"
+                          onClick={() => {
+                            setSelectedTaskForDocs(task);
+                            setViewDocsDialog(true);
+                          }}
+                        >
+                          <Eye className="w-3 h-3 mr-1" />
+                          Docs ({getDocumentsByTask(task.id).length})
+                        </Button>
                         <Button
                           size="sm"
                           variant="ghost"
@@ -782,13 +822,109 @@ const AdminCaseDetail = () => {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleConfirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-red-600 hover:bg-red-700"
             >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* View Documents Dialog */}
+      <Dialog open={viewDocsDialog} onOpenChange={setViewDocsDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Documents for "{selectedTaskForDocs?.title}"</DialogTitle>
+            <DialogDescription>
+              View, preview, download, and approve documents uploaded for this task.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-3">
+            {selectedTaskForDocs && getDocumentsByTask(selectedTaskForDocs.id).length === 0 ? (
+              <div className="text-center py-12">
+                <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">No documents uploaded yet</p>
+              </div>
+            ) : (
+              selectedTaskForDocs && getDocumentsByTask(selectedTaskForDocs.id).map((doc) => (
+                <div
+                  key={doc.id}
+                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="w-10 h-10 bg-brand-navy/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-5 h-5 text-brand-navy" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-medium text-brand-navy truncate">
+                        {doc.file_name}
+                      </h3>
+                      <div className="flex items-center gap-3 mt-1">
+                        {doc.file_size && (
+                          <span className="text-xs text-gray-500">
+                            {(doc.file_size / 1024 / 1024).toFixed(2)} MB
+                          </span>
+                        )}
+                        <span className="text-xs text-gray-300">•</span>
+                        <span className="text-xs text-gray-500">
+                          {new Date(doc.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={doc.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      title="Preview/Download"
+                    >
+                      <Download className="w-4 h-4 text-gray-600" />
+                    </a>
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => {
+                        if (caseId) {
+                          approveDocument.mutate({
+                            documentId: doc.id,
+                            taskId: selectedTaskForDocs.id,
+                            caseId: caseId,
+                          });
+                        }
+                      }}
+                      disabled={approveDocument.isPending}
+                    >
+                      <CheckCircle className="w-4 h-4 mr-1" />
+                      Approve
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        if (confirm("Delete this document?")) {
+                          deleteDocument.mutate(doc.id);
+                        }
+                      }}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewDocsDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

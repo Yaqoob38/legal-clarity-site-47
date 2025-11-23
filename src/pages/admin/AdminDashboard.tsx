@@ -12,7 +12,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
 
-  const { data: cases, isLoading } = useQuery({
+  const { data: cases, isLoading, error } = useQuery({
     queryKey: ["admin-cases"],
     queryFn: async () => {
       console.log("Fetching admin cases...");
@@ -20,7 +20,7 @@ const AdminDashboard = () => {
         .from("cases")
         .select(`
           *,
-          profiles(full_name)
+          profiles!cases_client_id_fkey(full_name)
         `)
         .order("created_at", { ascending: false });
 
@@ -28,11 +28,11 @@ const AdminDashboard = () => {
         console.error("Error fetching cases:", error);
         throw error;
       }
-      console.log("Fetched cases:", data?.length);
+      console.log("Fetched cases:", data);
       return data;
     },
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    refetchInterval: 60000, // Refetch every minute
   });
 
   const handleSignOut = async () => {
@@ -54,7 +54,18 @@ const AdminDashboard = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Error loading dashboard</p>
+          <Button onClick={() => window.location.reload()}>Reload Page</Button>
         </div>
       </div>
     );
@@ -142,8 +153,11 @@ const AdminDashboard = () => {
                     <div className="flex items-center gap-4 text-sm">
                       <span className="text-muted-foreground">
                         Client:{" "}
-                        {caseItem.client_id
-                          ? (caseItem.profiles as any)?.full_name || "Unknown"
+                        {caseItem.client_id && 
+                         caseItem.profiles &&
+                         typeof caseItem.profiles === 'object' && 
+                         'full_name' in (caseItem.profiles || {})
+                          ? (caseItem.profiles as { full_name: string }).full_name
                           : caseItem.client_email || "Not assigned"}
                       </span>
                       <Badge variant="secondary">{getStageLabel(caseItem.stage)}</Badge>

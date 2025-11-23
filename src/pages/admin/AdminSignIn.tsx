@@ -27,10 +27,10 @@ const AdminSignIn = () => {
         return;
       }
       
-      // Wait a moment for auth state to update
-      await new Promise(resolve => setTimeout(resolve, 500));
-      navigate("/admin/dashboard");
+      // Just navigate - the AdminRedirect component will handle role-based routing
+      navigate("/");
     } catch (error: any) {
+      console.error("Admin signin error:", error);
       toast.error("An error occurred during sign in");
     } finally {
       setLoading(false);

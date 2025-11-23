@@ -60,9 +60,9 @@ const AdminSignup = () => {
       }
       
       toast.success("Admin account created successfully!");
-      // Wait a bit more to ensure role is fully saved
+      // Navigate to root - AdminRedirect will route based on role
       await new Promise(resolve => setTimeout(resolve, 500));
-      navigate("/admin/dashboard");
+      navigate("/");
     } catch (error: any) {
       console.error("Signup error:", error);
       toast.error("An error occurred during sign up");

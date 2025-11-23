@@ -16,6 +16,7 @@ import Calendar from "./pages/Calendar";
 import TaskDetail from "./pages/TaskDetail";
 import NotFound from "./pages/NotFound";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import AdminRedirect from "./components/AdminRedirect";
 import AdminSignIn from "./pages/admin/AdminSignIn";
 import AdminSignup from "./pages/admin/AdminSignup";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -32,9 +33,9 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/signin" element={<SignIn />} />
+          <Route path="/" element={<AdminRedirect />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/signin" element={<SignIn />} />
             <Route 
               path="/dashboard" 
               element={

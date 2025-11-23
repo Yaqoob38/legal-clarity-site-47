@@ -21,9 +21,9 @@ const AdminSignIn = () => {
 
     try {
       const { error } = await signIn(email, password);
-      if (error) {
-        toast.error(error.message);
-      } else {
+      if (!error) {
+        // Wait a moment then check if user is admin
+        await new Promise(resolve => setTimeout(resolve, 500));
         navigate("/admin/dashboard");
       }
     } catch (error: any) {

@@ -45,7 +45,7 @@ const Signup = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate("/");
+      navigate("/dashboard");
     }
   }, [user, navigate]);
 
@@ -54,7 +54,7 @@ const Signup = () => {
     try {
       const { error } = await signUp(data.email, data.password, data.name);
       if (!error) {
-        setTimeout(() => navigate("/"), 1500);
+        setTimeout(() => navigate("/dashboard"), 1500);
       }
     } finally {
       setIsLoading(false);

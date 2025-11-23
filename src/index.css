@@ -129,6 +129,15 @@ All colors MUST be HSL.
   .service-card:hover .service-icon {
     color: #f59e0b;
   }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 @keyframes fadeIn {

@@ -24,6 +24,7 @@ export default {
           gold: '#C5A059',
           goldLight: '#E5C578',
           cream: '#f8fafc',
+          gray: '#f1f5f9',
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

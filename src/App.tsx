@@ -15,6 +15,12 @@ import Messages from "./pages/Messages";
 import Calendar from "./pages/Calendar";
 import TaskDetail from "./pages/TaskDetail";
 import NotFound from "./pages/NotFound";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import AdminSignIn from "./pages/admin/AdminSignIn";
+import AdminSignup from "./pages/admin/AdminSignup";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminNewCase from "./pages/admin/AdminNewCase";
+import AdminCaseDetail from "./pages/admin/AdminCaseDetail";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +83,35 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            
+            {/* Admin Routes */}
+            <Route path="/admin/signin" element={<AdminSignIn />} />
+            <Route path="/admin/signup" element={<AdminSignup />} />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <AdminProtectedRoute>
+                  <AdminDashboard />
+                </AdminProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/cases/new"
+              element={
+                <AdminProtectedRoute>
+                  <AdminNewCase />
+                </AdminProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/cases/:caseId"
+              element={
+                <AdminProtectedRoute>
+                  <AdminCaseDetail />
+                </AdminProtectedRoute>
+              }
+            />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

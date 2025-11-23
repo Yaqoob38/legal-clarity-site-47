@@ -144,7 +144,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <span className="bg-brand-navy/10 text-brand-navy px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">First Stage</span>
-                  <span className="text-gray-400 text-xs font-medium">3</span>
+                  <span className="text-gray-400 text-xs font-medium">{stage1Tasks.length}</span>
                 </div>
                 <MoreHorizontal className="w-4 h-4 text-gray-400 cursor-pointer" />
               </div>
@@ -193,7 +193,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Second Stage</span>
-                  <span className="text-gray-400 text-xs font-medium">2</span>
+                  <span className="text-gray-400 text-xs font-medium">{stage2Tasks.length}</span>
                 </div>
                 <MoreHorizontal className="w-4 h-4 text-gray-400 cursor-pointer" />
               </div>
@@ -228,7 +228,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Third Stage</span>
-                  <span className="text-gray-400 text-xs font-medium">0</span>
+                  <span className="text-gray-400 text-xs font-medium">{stage3Tasks.length}</span>
                 </div>
                 <MoreHorizontal className="w-4 h-4 text-gray-400 cursor-pointer" />
               </div>

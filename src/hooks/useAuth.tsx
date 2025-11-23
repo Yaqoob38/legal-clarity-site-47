@@ -7,7 +7,7 @@ import { toast } from "sonner";
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, invitationToken?: string | null) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   loading: boolean;
@@ -41,18 +41,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, invitationToken?: string | null) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
+      
+      const metadata: any = {
+        full_name: fullName,
+      };
+      
+      // Add invitation token to metadata if present
+      if (invitationToken) {
+        metadata.invitation_token = invitationToken;
+      }
       
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: redirectUrl,
-          data: {
-            full_name: fullName,
-          }
+          data: metadata
         }
       });
       

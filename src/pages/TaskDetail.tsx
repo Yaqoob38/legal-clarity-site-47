@@ -1,9 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Upload, FileText, Check, X } from "lucide-react";
+import { ArrowLeft, Upload, FileText, Check, X, Download } from "lucide-react";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { useTasks } from "@/hooks/useTasks";
 import { useDocuments } from "@/hooks/useDocuments";
 import { useState, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const TaskDetail = () => {
   const { taskId } = useParams();
@@ -51,6 +52,16 @@ const TaskDetail = () => {
       taskId: task.id,
       updates: { notes },
     });
+  };
+
+  const handleDownloadDocument = async (fileName: string) => {
+    const { data } = supabase.storage
+      .from('document-templates')
+      .getPublicUrl(fileName);
+    
+    if (data?.publicUrl) {
+      window.open(data.publicUrl, '_blank');
+    }
   };
 
   if (!task) {
@@ -152,7 +163,11 @@ const TaskDetail = () => {
                           <p className="text-sm font-medium text-brand-navy">{doc}</p>
                           <p className="text-xs text-gray-500">PDF Document</p>
                         </div>
-                        <button className="px-4 py-2 bg-brand-navy hover:bg-brand-slate text-white text-sm rounded-lg transition-colors">
+                        <button 
+                          onClick={() => handleDownloadDocument(doc)}
+                          className="px-4 py-2 bg-brand-navy hover:bg-brand-slate text-white text-sm rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <Download className="w-4 h-4" />
                           Download
                         </button>
                       </div>

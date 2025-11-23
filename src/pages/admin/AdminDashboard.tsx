@@ -1,16 +1,30 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, LogOut, Users, FileText, Clock } from "lucide-react";
+import { Plus, LogOut, Users, FileText, Clock, Edit, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const queryClient = useQueryClient();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [caseToDelete, setCaseToDelete] = useState<string | null>(null);
 
   const { data: cases, isLoading, error } = useQuery({
     queryKey: ["admin-cases"],
@@ -26,9 +40,40 @@ const AdminDashboard = () => {
     retry: 1,
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (caseId: string) => {
+      const { error } = await supabase
+        .from("cases")
+        .delete()
+        .eq("id", caseId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-cases"] });
+      toast.success("Case deleted successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to delete case");
+    },
+  });
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/admin/signin");
+  };
+
+  const handleDeleteClick = (caseId: string) => {
+    setCaseToDelete(caseId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (caseToDelete) {
+      await deleteMutation.mutateAsync(caseToDelete);
+      setDeleteDialogOpen(false);
+      setCaseToDelete(null);
+    }
   };
 
   const getStageLabel = (stage: string) => {
@@ -128,10 +173,12 @@ const AdminDashboard = () => {
               {cases?.map((caseItem) => (
                 <div
                   key={caseItem.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent cursor-pointer transition-colors"
-                  onClick={() => navigate(`/admin/cases/${caseItem.id}`)}
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors"
                 >
-                  <div className="flex-1">
+                  <div
+                    className="flex-1 cursor-pointer"
+                    onClick={() => navigate(`/admin/cases/${caseItem.id}`)}
+                  >
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-semibold">{caseItem.case_reference}</h3>
                       {!caseItem.client_id && (
@@ -148,10 +195,32 @@ const AdminDashboard = () => {
                       <Badge variant="secondary">{getStageLabel(caseItem.stage)}</Badge>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm text-muted-foreground">
-                      Progress: {caseItem.progress}%
+                  <div className="flex items-center gap-2">
+                    <div className="text-right mr-4">
+                      <div className="text-sm text-muted-foreground">
+                        Progress: {caseItem.progress}%
+                      </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/admin/cases/${caseItem.id}/edit`);
+                      }}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClick(caseItem.id);
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -164,6 +233,24 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
       </main>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Case</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this case? This action cannot be undone.
+              All associated tasks and documents will also be deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

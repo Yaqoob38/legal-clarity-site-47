@@ -34,26 +34,41 @@ const DashboardSidebar = () => {
           <LayoutDashboard className="w-5 h-5 group-hover:text-brand-gold transition-colors" />
           <span className="font-medium tracking-wide">Dashboard</span>
         </NavLink>
-        
-        <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all group">
+        <NavLink
+          to="/dashboard/tasks"
+          className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all group"
+          activeClassName="bg-white/10 text-white border-l-4 border-brand-gold"
+        >
           <CheckSquare className="w-5 h-5 group-hover:text-brand-gold transition-colors" />
           <span className="font-medium tracking-wide">Tasks</span>
-        </a>
+        </NavLink>
         
-        <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all group">
+        <NavLink
+          to="/dashboard/calendar"
+          className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all group"
+          activeClassName="bg-white/10 text-white border-l-4 border-brand-gold"
+        >
           <Calendar className="w-5 h-5 group-hover:text-brand-gold transition-colors" />
           <span className="font-medium tracking-wide">Calendar</span>
-        </a>
+        </NavLink>
         
-        <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all group">
+        <NavLink
+          to="/dashboard/documents"
+          className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all group"
+          activeClassName="bg-white/10 text-white border-l-4 border-brand-gold"
+        >
           <FolderOpen className="w-5 h-5 group-hover:text-brand-gold transition-colors" />
           <span className="font-medium tracking-wide">Documents</span>
-        </a>
+        </NavLink>
         
-        <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all group">
+        <NavLink
+          to="/dashboard/messages"
+          className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all group"
+          activeClassName="bg-white/10 text-white border-l-4 border-brand-gold"
+        >
           <MessageSquare className="w-5 h-5 group-hover:text-brand-gold transition-colors" />
           <span className="font-medium tracking-wide">Messages</span>
-        </a>
+        </NavLink>
       </nav>
 
       {/* User Profile (Bottom Sidebar) */}

@@ -9,6 +9,11 @@ import Index from "./pages/Index";
 import Signup from "./pages/Signup";
 import SignIn from "./pages/SignIn";
 import Dashboard from "./pages/Dashboard";
+import Tasks from "./pages/Tasks";
+import Documents from "./pages/Documents";
+import Messages from "./pages/Messages";
+import Calendar from "./pages/Calendar";
+import TaskDetail from "./pages/TaskDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +34,46 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/tasks" 
+              element={
+                <ProtectedRoute>
+                  <Tasks />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/documents" 
+              element={
+                <ProtectedRoute>
+                  <Documents />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/messages" 
+              element={
+                <ProtectedRoute>
+                  <Messages />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/calendar" 
+              element={
+                <ProtectedRoute>
+                  <Calendar />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/task/:taskId" 
+              element={
+                <ProtectedRoute>
+                  <TaskDetail />
                 </ProtectedRoute>
               } 
             />

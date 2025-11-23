@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { MoreHorizontal, ChevronDown, LayoutGrid, List, Upload, Check } from "lucide-react";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { useTasks } from "@/hooks/useTasks";
@@ -28,6 +29,7 @@ const getStatusLabel = (status: string) => {
 const Tasks = () => {
   const navigate = useNavigate();
   const { tasks, isLoading, getTasksByStage } = useTasks();
+  const [viewMode, setViewMode] = useState<"board" | "list">("board");
 
   const stage1Tasks = getTasksByStage("STAGE_1");
   const stage2Tasks = getTasksByStage("STAGE_2");
@@ -68,10 +70,20 @@ const Tasks = () => {
             <div className="flex items-center gap-4">
               <h2 className="text-xl font-serif font-bold text-brand-navy">All Tasks</h2>
               <div className="flex bg-white rounded-lg p-1 border border-gray-200 shadow-sm">
-                <button className="px-3 py-1.5 rounded bg-brand-navy text-white text-xs font-medium flex items-center gap-2 shadow-sm">
+                <button 
+                  onClick={() => setViewMode("board")}
+                  className={`px-3 py-1.5 rounded text-xs font-medium flex items-center gap-2 transition-colors ${
+                    viewMode === "board" ? "bg-brand-navy text-white shadow-sm" : "text-gray-500 hover:bg-gray-50"
+                  }`}
+                >
                   <LayoutGrid className="w-3 h-3" /> Board View
                 </button>
-                <button className="px-3 py-1.5 rounded text-gray-500 hover:bg-gray-50 text-xs font-medium flex items-center gap-2 transition-colors">
+                <button 
+                  onClick={() => setViewMode("list")}
+                  className={`px-3 py-1.5 rounded text-xs font-medium flex items-center gap-2 transition-colors ${
+                    viewMode === "list" ? "bg-brand-navy text-white shadow-sm" : "text-gray-500 hover:bg-gray-50"
+                  }`}
+                >
                   <List className="w-3 h-3" /> List View
                 </button>
               </div>
@@ -84,8 +96,10 @@ const Tasks = () => {
             </div>
           </div>
 
-          {/* Kanban Board */}
-          <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
+          {/* View Toggle */}
+          {viewMode === "board" ? (
+            /* Kanban Board */
+            <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
             
             {/* Column 1: First Stage */}
             <div className="w-80 flex-shrink-0 flex flex-col">
@@ -197,7 +211,116 @@ const Tasks = () => {
               </div>
             </div>
 
-          </div>
+            </div>
+          ) : (
+            /* List View */
+            <div className="max-w-6xl space-y-6">
+              {/* Stage 1 */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="bg-brand-navy/5 px-6 py-3 border-b border-gray-200">
+                  <h3 className="font-serif font-bold text-brand-navy">First Stage</h3>
+                </div>
+                <div className="divide-y divide-gray-100">
+                  {stage1Tasks.map((task) => (
+                    <div 
+                      key={task.id}
+                      onClick={() => navigate(`/dashboard/task/${task.id}`)}
+                      className="px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-4 flex-1">
+                        {task.status === "COMPLETE" ? (
+                          <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                            <Check className="w-3 h-3 text-white" />
+                          </div>
+                        ) : (
+                          <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 ${
+                            task.status === "IN_PROGRESS" ? "border-brand-gold" : "border-gray-300"
+                          }`} />
+                        )}
+                        <div className="flex-1">
+                          <h4 className="font-medium text-brand-navy">{task.title}</h4>
+                          {task.description && (
+                            <p className="text-sm text-gray-500 mt-1">{task.description}</p>
+                          )}
+                        </div>
+                      </div>
+                      <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${getStatusColor(task.status)}`}>
+                        {getStatusLabel(task.status)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stage 2 */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="bg-gray-100 px-6 py-3 border-b border-gray-200">
+                  <h3 className="font-serif font-bold text-gray-600">Second Stage</h3>
+                </div>
+                <div className="divide-y divide-gray-100">
+                  {stage2Tasks.map((task) => (
+                    <div 
+                      key={task.id}
+                      onClick={() => navigate(`/dashboard/task/${task.id}`)}
+                      className={`px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors flex items-center justify-between ${
+                        task.status === "LOCKED" ? "opacity-60" : ""
+                      }`}
+                    >
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0" />
+                        <div className="flex-1">
+                          <h4 className="font-medium text-brand-navy">{task.title}</h4>
+                          {task.description && (
+                            <p className="text-sm text-gray-500 mt-1">{task.description}</p>
+                          )}
+                        </div>
+                      </div>
+                      <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${getStatusColor(task.status)}`}>
+                        {getStatusLabel(task.status)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stage 3 */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="bg-gray-100 px-6 py-3 border-b border-gray-200">
+                  <h3 className="font-serif font-bold text-gray-600">Third Stage</h3>
+                </div>
+                {stage3Tasks.length > 0 ? (
+                  <div className="divide-y divide-gray-100">
+                    {stage3Tasks.map((task) => (
+                      <div 
+                        key={task.id}
+                        onClick={() => navigate(`/dashboard/task/${task.id}`)}
+                        className={`px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors flex items-center justify-between ${
+                          task.status === "LOCKED" ? "opacity-60" : ""
+                        }`}
+                      >
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0" />
+                          <div className="flex-1">
+                            <h4 className="font-medium text-brand-navy">{task.title}</h4>
+                            {task.description && (
+                              <p className="text-sm text-gray-500 mt-1">{task.description}</p>
+                            )}
+                          </div>
+                        </div>
+                        <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${getStatusColor(task.status)}`}>
+                          {getStatusLabel(task.status)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="px-6 py-8 text-center text-gray-400">
+                    No tasks visible yet
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>

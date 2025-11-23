@@ -17,10 +17,7 @@ export const useMessages = () => {
 
       const { data, error } = await supabase
         .from("messages")
-        .select(`
-          *,
-          sender:sender_id(email)
-        `)
+        .select("*")
         .eq("case_id", userCase.id)
         .order("created_at", { ascending: true });
 

@@ -1,18 +1,22 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Upload, FileText, Check, X, Download } from "lucide-react";
+import { ArrowLeft, Upload, FileText, Check, X, Download, Wand2 } from "lucide-react";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { useTasks } from "@/hooks/useTasks";
 import { useDocuments } from "@/hooks/useDocuments";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useGenerateTemplates } from "@/hooks/useGenerateTemplates";
+import { toast } from "sonner";
 
 const TaskDetail = () => {
   const { taskId } = useParams();
   const navigate = useNavigate();
   const { tasks, updateTask } = useTasks();
   const { uploadDocument, getDocumentsByTask } = useDocuments();
+  const { generateTemplates } = useGenerateTemplates();
   const [isDragging, setIsDragging] = useState(false);
   const [notes, setNotes] = useState("");
+  const [hasCheckedTemplates, setHasCheckedTemplates] = useState(false);
 
   const task = tasks.find((t) => t.id === taskId);
   const taskDocuments = task ? getDocumentsByTask(task.id) : [];
@@ -63,6 +67,26 @@ const TaskDetail = () => {
       window.open(data.publicUrl, '_blank');
     }
   };
+
+  // Check if templates exist, if not generate them automatically
+  useEffect(() => {
+    const checkAndGenerateTemplates = async () => {
+      if (hasCheckedTemplates) return;
+      
+      const { data: files } = await supabase.storage
+        .from('document-templates')
+        .list();
+
+      if (!files || files.length === 0) {
+        toast.info("Generating document templates...");
+        await generateTemplates.mutateAsync();
+      }
+      
+      setHasCheckedTemplates(true);
+    };
+
+    checkAndGenerateTemplates();
+  }, [hasCheckedTemplates]);
 
   if (!task) {
     return (

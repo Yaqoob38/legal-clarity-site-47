@@ -14,6 +14,196 @@ export type Database = {
   }
   public: {
     Tables: {
+      calendar_events: {
+        Row: {
+          case_id: string
+          created_at: string
+          description: string | null
+          event_date: string
+          event_type: string
+          id: string
+          title: string
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          description?: string | null
+          event_date: string
+          event_type: string
+          id?: string
+          title: string
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          description?: string | null
+          event_date?: string
+          event_type?: string
+          id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cases: {
+        Row: {
+          case_reference: string
+          case_type: string
+          client_id: string
+          created_at: string
+          id: string
+          progress: number
+          property_address: string
+          property_postcode: string | null
+          stage: Database["public"]["Enums"]["case_stage"]
+          updated_at: string
+        }
+        Insert: {
+          case_reference: string
+          case_type?: string
+          client_id: string
+          created_at?: string
+          id?: string
+          progress?: number
+          property_address: string
+          property_postcode?: string | null
+          stage?: Database["public"]["Enums"]["case_stage"]
+          updated_at?: string
+        }
+        Update: {
+          case_reference?: string
+          case_type?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+          progress?: number
+          property_address?: string
+          property_postcode?: string | null
+          stage?: Database["public"]["Enums"]["case_stage"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          case_id: string
+          created_at: string
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          task_id: string | null
+          uploaded_by: string
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          task_id?: string | null
+          uploaded_by: string
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          task_id?: string | null
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          case_id: string
+          content: string
+          created_at: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          case_id: string
+          content: string
+          created_at?: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          case_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          message: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -38,6 +228,56 @@ export type Database = {
         }
         Relationships: []
       }
+      tasks: {
+        Row: {
+          case_id: string
+          created_at: string
+          description: string | null
+          id: string
+          notes: string | null
+          order_index: number
+          required_documents: string[] | null
+          stage: Database["public"]["Enums"]["case_stage"]
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          notes?: string | null
+          order_index?: number
+          required_documents?: string[] | null
+          stage: Database["public"]["Enums"]["case_stage"]
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          notes?: string | null
+          order_index?: number
+          required_documents?: string[] | null
+          stage?: Database["public"]["Enums"]["case_stage"]
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -46,7 +286,16 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      case_stage: "STAGE_1" | "STAGE_2" | "STAGE_3"
+      task_status:
+        | "NOT_STARTED"
+        | "IN_PROGRESS"
+        | "SUBMITTED"
+        | "PENDING_REVIEW"
+        | "APPROVED"
+        | "REJECTED"
+        | "LOCKED"
+        | "COMPLETE"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -173,6 +422,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      case_stage: ["STAGE_1", "STAGE_2", "STAGE_3"],
+      task_status: [
+        "NOT_STARTED",
+        "IN_PROGRESS",
+        "SUBMITTED",
+        "PENDING_REVIEW",
+        "APPROVED",
+        "REJECTED",
+        "LOCKED",
+        "COMPLETE",
+      ],
+    },
   },
 } as const

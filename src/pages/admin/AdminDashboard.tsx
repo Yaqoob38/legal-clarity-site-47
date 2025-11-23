@@ -15,24 +15,28 @@ const AdminDashboard = () => {
   const { data: cases, isLoading, error } = useQuery({
     queryKey: ["admin-cases"],
     queryFn: async () => {
-      console.log("Fetching admin cases...");
       const { data, error } = await supabase
         .from("cases")
         .select(`
-          *,
+          id,
+          case_reference,
+          property_address,
+          property_postcode,
+          case_type,
+          stage,
+          progress,
+          client_id,
+          client_email,
+          invitation_token,
+          created_at,
           profiles!cases_client_id_fkey(full_name)
         `)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching cases:", error);
-        throw error;
-      }
-      console.log("Fetched cases:", data);
+      if (error) throw error;
       return data;
     },
-    staleTime: 30000, // Consider data fresh for 30 seconds
-    refetchInterval: 60000, // Refetch every minute
+    retry: 1,
   });
 
   const handleSignOut = async () => {

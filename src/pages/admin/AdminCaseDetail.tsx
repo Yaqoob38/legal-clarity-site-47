@@ -1,14 +1,8 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Database } from "@/integrations/supabase/types";
+import { Bell, Home, FileText, ArrowRight, UploadCloud, Upload, Check, MoreHorizontal, ChevronRight, ChevronDown, LayoutGrid, List, ArrowLeft, Edit2, Trash2, Plus, CheckCircle, XCircle, Unlock } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAdminCase } from "@/hooks/useAdminCase";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowLeft, Home, FileText, MoreHorizontal, Check, X, Plus, Edit2, 
-  MessageSquare, Calendar, CheckCircle, XCircle, Unlock, Trash2,
-  ChevronRight, LayoutGrid, List, Upload, ArrowRight
-} from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -38,12 +32,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
+import { useQueryClient } from "@tanstack/react-query";
 
 const AdminCaseDetail = () => {
   const { caseId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { caseData, tasks, isLoading, getTasksByStage } = useAdminCase(caseId!);
   const [addTaskDialog, setAddTaskDialog] = useState(false);
   const [editTaskDialog, setEditTaskDialog] = useState(false);
   const [deleteTaskDialog, setDeleteTaskDialog] = useState(false);
@@ -60,177 +57,51 @@ const AdminCaseDetail = () => {
     status: "NOT_STARTED",
   });
 
-  const { data: caseData, isLoading: caseLoading } = useQuery({
-    queryKey: ["admin-case", caseId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("cases")
-        .select(`
-          *,
-          profiles(full_name, phone)
-        `)
-        .eq("id", caseId!)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    staleTime: 2 * 60 * 1000,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-  });
-
-  const { data: tasks = [], isLoading: tasksLoading } = useQuery({
-    queryKey: ["admin-case-tasks", caseId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tasks")
-        .select("*")
-        .eq("case_id", caseId!)
-        .order("order_index");
-
-      if (error) throw error;
-      return data || [];
-    },
-    staleTime: 2 * 60 * 1000,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-  });
-
-  const approveTaskMutation = useMutation({
-    mutationFn: async (taskId: string) => {
-      const { error } = await supabase
-        .from("tasks")
-        .update({ status: "COMPLETE" })
-        .eq("id", taskId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-case-tasks", caseId] });
-      toast.success("Task approved!");
-    },
-  });
-
-  const rejectTaskMutation = useMutation({
-    mutationFn: async (taskId: string) => {
-      const { error } = await supabase
-        .from("tasks")
-        .update({ status: "NOT_STARTED" })
-        .eq("id", taskId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-case-tasks", caseId] });
-      toast.success("Task rejected. Client needs to resubmit.");
-    },
-  });
-
-  const updateTaskStatusMutation = useMutation({
-    mutationFn: async ({ taskId, status }: { taskId: string; status: Database["public"]["Enums"]["task_status"] }) => {
-      const { error } = await supabase
-        .from("tasks")
-        .update({ status })
-        .eq("id", taskId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-case-tasks", caseId] });
-      toast.success("Task updated!");
-    },
-  });
-
-  const addTaskMutation = useMutation({
-    mutationFn: async () => {
-      const maxOrder = tasks.length > 0 ? Math.max(...tasks.map(t => t.order_index)) : -1;
-      
-      const { error } = await supabase
-        .from("tasks")
-        .insert({
-          case_id: caseId!,
-          title: newTask.title,
-          description: newTask.description,
-          stage: newTask.stage,
-          status: newTask.status,
-          order_index: maxOrder + 1,
-        });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-case-tasks", caseId] });
-      toast.success("Task added successfully!");
-      setAddTaskDialog(false);
-      setNewTask({ title: "", description: "", stage: "STAGE_1", status: "NOT_STARTED" });
-    },
-  });
-
-  const editTaskMutation = useMutation({
-    mutationFn: async () => {
-      if (!selectedTask) return;
-      
-      const { error } = await supabase
-        .from("tasks")
-        .update({
-          title: selectedTask.title,
-          description: selectedTask.description,
-          stage: selectedTask.stage,
-          status: selectedTask.status,
-        })
-        .eq("id", selectedTask.id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-case-tasks", caseId] });
-      toast.success("Task updated successfully!");
-      setEditTaskDialog(false);
-      setSelectedTask(null);
-    },
-  });
-
-  const deleteTaskMutation = useMutation({
-    mutationFn: async (taskId: string) => {
-      const { error } = await supabase
-        .from("tasks")
-        .delete()
-        .eq("id", taskId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-case-tasks", caseId] });
-      toast.success("Task deleted successfully!");
-      setDeleteTaskDialog(false);
-      setSelectedTask(null);
-    },
-  });
-
-  const getTasksByStage = (stage: string) => {
-    return tasks.filter((task) => task.stage === stage);
-  };
-
   const stage1Tasks = getTasksByStage("STAGE_1");
   const stage2Tasks = getTasksByStage("STAGE_2");
   const stage3Tasks = getTasksByStage("STAGE_3");
 
   const nextTask = tasks.find((t) => t.status === "IN_PROGRESS") || tasks.find((t) => t.status === "NOT_STARTED");
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "COMPLETE":
-        return "text-green-700 bg-green-50";
-      case "IN_PROGRESS":
-        return "text-brand-gold";
-      case "SUBMITTED":
-      case "PENDING_REVIEW":
-        return "text-orange-500 bg-orange-50";
-      case "LOCKED":
-        return "text-gray-400";
-      default:
-        return "text-gray-500";
+  const handleApproveTask = async (taskId: string) => {
+    const { error } = await supabase
+      .from("tasks")
+      .update({ status: "COMPLETE" })
+      .eq("id", taskId);
+
+    if (error) {
+      toast.error("Failed to approve task");
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["admin-case-tasks", caseId] });
+      toast.success("Task approved!");
+    }
+  };
+
+  const handleRejectTask = async (taskId: string) => {
+    const { error } = await supabase
+      .from("tasks")
+      .update({ status: "NOT_STARTED" })
+      .eq("id", taskId);
+
+    if (error) {
+      toast.error("Failed to reject task");
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["admin-case-tasks", caseId] });
+      toast.success("Task rejected. Client needs to resubmit.");
+    }
+  };
+
+  const handleUnlockTask = async (taskId: string) => {
+    const { error } = await supabase
+      .from("tasks")
+      .update({ status: "NOT_STARTED" })
+      .eq("id", taskId);
+
+    if (error) {
+      toast.error("Failed to unlock task");
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["admin-case-tasks", caseId] });
+      toast.success("Task unlocked!");
     }
   };
 
@@ -244,7 +115,72 @@ const AdminCaseDetail = () => {
     setDeleteTaskDialog(true);
   };
 
-  if (caseLoading || tasksLoading) {
+  const handleSaveEditTask = async () => {
+    if (!selectedTask) return;
+    
+    const { error } = await supabase
+      .from("tasks")
+      .update({
+        title: selectedTask.title,
+        description: selectedTask.description,
+        stage: selectedTask.stage,
+        status: selectedTask.status,
+      })
+      .eq("id", selectedTask.id);
+
+    if (error) {
+      toast.error("Failed to update task");
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["admin-case-tasks", caseId] });
+      toast.success("Task updated successfully!");
+      setEditTaskDialog(false);
+      setSelectedTask(null);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedTask) return;
+    
+    const { error } = await supabase
+      .from("tasks")
+      .delete()
+      .eq("id", selectedTask.id);
+
+    if (error) {
+      toast.error("Failed to delete task");
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["admin-case-tasks", caseId] });
+      toast.success("Task deleted successfully!");
+      setDeleteTaskDialog(false);
+      setSelectedTask(null);
+    }
+  };
+
+  const handleAddTask = async () => {
+    const maxOrder = tasks.length > 0 ? Math.max(...tasks.map(t => t.order_index)) : -1;
+    
+    const { error } = await supabase
+      .from("tasks")
+      .insert({
+        case_id: caseId!,
+        title: newTask.title,
+        description: newTask.description,
+        stage: newTask.stage,
+        status: newTask.status,
+        order_index: maxOrder + 1,
+      });
+
+    if (error) {
+      toast.error("Failed to add task");
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["admin-case-tasks", caseId] });
+      toast.success("Task added successfully!");
+      setAddTaskDialog(false);
+      setNewTask({ title: "", description: "", stage: "STAGE_1", status: "NOT_STARTED" });
+    }
+  };
+
+  if (isLoading) {
     return (
       <div className="bg-brand-gray h-screen flex overflow-hidden">
         <div className="flex-1 flex items-center justify-center">
@@ -265,6 +201,7 @@ const AdminCaseDetail = () => {
     <div className="bg-brand-gray font-sans text-brand-navy antialiased h-screen flex overflow-hidden">
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-full overflow-hidden">
+        
         {/* Top Header */}
         <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 flex-shrink-0">
           <div className="flex items-center gap-4">
@@ -275,11 +212,12 @@ const AdminCaseDetail = () => {
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
             <div>
-              <h1 className="text-2xl font-serif text-brand-navy">Case Dashboard</h1>
-              <p className="text-xs text-gray-500 uppercase tracking-widest">Admin View</p>
+              <h1 className="text-2xl font-serif text-brand-navy">Admin Case Dashboard</h1>
+              <p className="text-xs text-gray-500 uppercase tracking-widest">Case Management</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-6">
+            <div className="h-8 w-px bg-gray-200"></div>
             <button 
               onClick={() => setAddTaskDialog(true)}
               className="bg-brand-navy hover:bg-brand-slate text-white px-5 py-2 rounded text-sm font-medium transition-colors shadow-lg shadow-brand-navy/20"
@@ -291,6 +229,7 @@ const AdminCaseDetail = () => {
 
         {/* Scrollable Dashboard Content */}
         <div className="flex-1 overflow-x-hidden overflow-y-auto bg-brand-gray p-8">
+          
           {/* Case Overview Card */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8" style={{ animation: 'fadeIn 0.5s ease-out' }}>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -322,7 +261,7 @@ const AdminCaseDetail = () => {
                 </p>
               </div>
 
-              {/* Stage */}
+              {/* Client Info */}
               <div className="col-span-1 md:col-span-1 border-b md:border-b-0 md:border-r border-gray-100 pb-4 md:pb-0 md:pr-4">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">Client</span>
                 <div className="flex items-center gap-2">
@@ -330,12 +269,12 @@ const AdminCaseDetail = () => {
                   <span className="text-lg font-serif font-medium text-brand-navy">{clientName}</span>
                 </div>
                 <div className="w-full bg-gray-100 h-1.5 mt-2 rounded-full overflow-hidden">
-                  <div className="bg-brand-gold h-full rounded-full" style={{ width: `${caseData?.progress || 0}%` }}></div>
+                  <div className="bg-brand-gold h-full rounded-full" style={{ width: `${caseData?.progress || 25}%` }}></div>
                 </div>
               </div>
 
               <div className="col-span-1 md:col-span-1 bg-brand-navy/5 rounded-lg p-3 flex items-center justify-between group cursor-pointer border border-transparent hover:border-brand-gold/30 transition-all"
-                onClick={() => nextTask && navigate(`/admin/cases/${caseId}/task/${nextTask.id}`)}
+                onClick={() => nextTask && navigate(`/dashboard/task/${nextTask.id}`)}
               >
                 <div>
                   <span className="text-xs font-bold text-brand-gold uppercase tracking-widest block mb-1">Next Task</span>
@@ -361,14 +300,15 @@ const AdminCaseDetail = () => {
                 </button>
               </div>
             </div>
-            <div className="text-xs text-gray-500">
-              Admin controls enabled
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-400">Admin Controls Enabled</span>
             </div>
           </div>
 
           {/* Kanban Board (Horizontal Scrollable) */}
           <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
-            {/* Column 1: First Stage */}
+            
+            {/* Column 1: First Stage (Active) */}
             <div className="w-80 flex-shrink-0 flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -383,14 +323,16 @@ const AdminCaseDetail = () => {
                   <div 
                     key={task.id}
                     className={`bg-white p-4 rounded-lg shadow-sm border hover:shadow-md transition-shadow ${
-                      task.status === "IN_PROGRESS" ? "border-l-4 border-l-brand-gold" : 
-                      task.status === "COMPLETE" ? "bg-gray-50 border-gray-200 opacity-75" : 
-                      task.status === "PENDING_REVIEW" ? "border-l-4 border-l-orange-500" :
-                      "border-gray-200"
+                      task.status === "IN_PROGRESS" ? "border-l-4 border-l-brand-gold" : task.status === "COMPLETE" ? "bg-gray-50 border-gray-200 opacity-75" : "border-gray-200"
                     }`}
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <span className={`text-xs font-bold uppercase tracking-wider ${getStatusColor(task.status)} ${task.status === "COMPLETE" || task.status === "PENDING_REVIEW" || task.status === "SUBMITTED" ? "px-2 py-0.5 rounded-full" : ""}`}>
+                      <span className={`text-xs font-bold uppercase tracking-wider ${
+                        task.status === "IN_PROGRESS" ? "text-brand-gold" :
+                        task.status === "COMPLETE" ? "text-green-700 bg-green-50 px-2 py-0.5 rounded-full" :
+                        task.status === "SUBMITTED" || task.status === "PENDING_REVIEW" ? "text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full" :
+                        "text-gray-500"
+                      }`}>
                         {task.status.replace(/_/g, " ")}
                       </span>
                       {task.status === "COMPLETE" && (
@@ -398,21 +340,27 @@ const AdminCaseDetail = () => {
                           <Check className="w-3 h-3 text-white" />
                         </div>
                       )}
+                      {task.status === "IN_PROGRESS" && (
+                        <UploadCloud className="w-4 h-4 text-gray-400" />
+                      )}
                     </div>
                     <h3 className="text-sm font-bold text-brand-navy mb-1">{task.title}</h3>
                     {task.description && (
                       <p className="text-xs text-gray-500 line-clamp-2">{task.description}</p>
                     )}
-
+                    {task.status === "COMPLETE" && (
+                      <p className="text-xs text-gray-400 mt-2">Completed</p>
+                    )}
+                    
                     {/* Admin Action Buttons */}
-                    <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                    <div className="flex gap-1 mt-3 pt-3 border-t border-gray-100">
                       {task.status === "PENDING_REVIEW" && (
                         <>
                           <Button
                             size="sm"
                             variant="default"
                             className="flex-1 text-xs h-7"
-                            onClick={() => approveTaskMutation.mutate(task.id)}
+                            onClick={() => handleApproveTask(task.id)}
                           >
                             <CheckCircle className="w-3 h-3 mr-1" />
                             Approve
@@ -421,7 +369,7 @@ const AdminCaseDetail = () => {
                             size="sm"
                             variant="destructive"
                             className="flex-1 text-xs h-7"
-                            onClick={() => rejectTaskMutation.mutate(task.id)}
+                            onClick={() => handleRejectTask(task.id)}
                           >
                             <XCircle className="w-3 h-3 mr-1" />
                             Reject
@@ -433,7 +381,7 @@ const AdminCaseDetail = () => {
                           size="sm"
                           variant="outline"
                           className="flex-1 text-xs h-7"
-                          onClick={() => updateTaskStatusMutation.mutate({ taskId: task.id, status: "NOT_STARTED" })}
+                          onClick={() => handleUnlockTask(task.id)}
                         >
                           <Unlock className="w-3 h-3 mr-1" />
                           Unlock
@@ -475,11 +423,8 @@ const AdminCaseDetail = () => {
                 {stage2Tasks.map((task) => (
                   <div 
                     key={task.id}
-                    className={`bg-white p-4 rounded-lg shadow-sm border hover:shadow-md transition-shadow ${
-                      task.status === "PENDING_REVIEW" ? "border-l-4 border-l-orange-500" :
-                      task.status === "COMPLETE" ? "bg-gray-50 border-gray-200 opacity-75" :
-                      task.status === "LOCKED" ? "opacity-60" : 
-                      "border-gray-200"
+                    className={`bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow ${
+                      task.status === "LOCKED" ? "opacity-60" : ""
                     }`}
                   >
                     <div className="flex justify-between items-start mb-2">
@@ -501,16 +446,16 @@ const AdminCaseDetail = () => {
                     {task.description && (
                       <p className="text-xs text-gray-500 line-clamp-2">{task.description}</p>
                     )}
-
+                    
                     {/* Admin Action Buttons */}
-                    <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                    <div className="flex gap-1 mt-3 pt-3 border-t border-gray-100">
                       {task.status === "PENDING_REVIEW" && (
                         <>
                           <Button
                             size="sm"
                             variant="default"
                             className="flex-1 text-xs h-7"
-                            onClick={() => approveTaskMutation.mutate(task.id)}
+                            onClick={() => handleApproveTask(task.id)}
                           >
                             <CheckCircle className="w-3 h-3 mr-1" />
                             Approve
@@ -519,7 +464,7 @@ const AdminCaseDetail = () => {
                             size="sm"
                             variant="destructive"
                             className="flex-1 text-xs h-7"
-                            onClick={() => rejectTaskMutation.mutate(task.id)}
+                            onClick={() => handleRejectTask(task.id)}
                           >
                             <XCircle className="w-3 h-3 mr-1" />
                             Reject
@@ -531,7 +476,7 @@ const AdminCaseDetail = () => {
                           size="sm"
                           variant="outline"
                           className="flex-1 text-xs h-7"
-                          onClick={() => updateTaskStatusMutation.mutate({ taskId: task.id, status: "NOT_STARTED" })}
+                          onClick={() => handleUnlockTask(task.id)}
                         >
                           <Unlock className="w-3 h-3 mr-1" />
                           Unlock
@@ -573,11 +518,8 @@ const AdminCaseDetail = () => {
                   stage3Tasks.map((task) => (
                     <div 
                       key={task.id}
-                      className={`bg-white p-4 rounded-lg shadow-sm border hover:shadow-md transition-shadow ${
-                        task.status === "PENDING_REVIEW" ? "border-l-4 border-l-orange-500" :
-                        task.status === "COMPLETE" ? "bg-gray-50 border-gray-200 opacity-75" :
-                        task.status === "LOCKED" ? "opacity-60" : 
-                        "border-gray-200"
+                      className={`bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow ${
+                        task.status === "LOCKED" ? "opacity-60" : ""
                       }`}
                     >
                       <div className="flex justify-between items-start mb-2">
@@ -599,16 +541,16 @@ const AdminCaseDetail = () => {
                       {task.description && (
                         <p className="text-xs text-gray-500 line-clamp-2">{task.description}</p>
                       )}
-
+                      
                       {/* Admin Action Buttons */}
-                      <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                      <div className="flex gap-1 mt-3 pt-3 border-t border-gray-100">
                         {task.status === "PENDING_REVIEW" && (
                           <>
                             <Button
                               size="sm"
                               variant="default"
                               className="flex-1 text-xs h-7"
-                              onClick={() => approveTaskMutation.mutate(task.id)}
+                              onClick={() => handleApproveTask(task.id)}
                             >
                               <CheckCircle className="w-3 h-3 mr-1" />
                               Approve
@@ -617,7 +559,7 @@ const AdminCaseDetail = () => {
                               size="sm"
                               variant="destructive"
                               className="flex-1 text-xs h-7"
-                              onClick={() => rejectTaskMutation.mutate(task.id)}
+                              onClick={() => handleRejectTask(task.id)}
                             >
                               <XCircle className="w-3 h-3 mr-1" />
                               Reject
@@ -629,7 +571,7 @@ const AdminCaseDetail = () => {
                             size="sm"
                             variant="outline"
                             className="flex-1 text-xs h-7"
-                            onClick={() => updateTaskStatusMutation.mutate({ taskId: task.id, status: "NOT_STARTED" })}
+                            onClick={() => handleUnlockTask(task.id)}
                           >
                             <Unlock className="w-3 h-3 mr-1" />
                             Unlock
@@ -668,6 +610,7 @@ const AdminCaseDetail = () => {
                 <ChevronRight className="w-5 h-5" />
               </div>
             </div>
+
           </div>
         </div>
       </main>
@@ -737,7 +680,7 @@ const AdminCaseDetail = () => {
               Cancel
             </Button>
             <Button 
-              onClick={() => addTaskMutation.mutate()}
+              onClick={handleAddTask}
               disabled={!newTask.title}
             >
               Add Task
@@ -813,7 +756,7 @@ const AdminCaseDetail = () => {
             <Button variant="outline" onClick={() => setEditTaskDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={() => editTaskMutation.mutate()}>
+            <Button onClick={handleSaveEditTask}>
               Save Changes
             </Button>
           </DialogFooter>
@@ -832,7 +775,7 @@ const AdminCaseDetail = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={() => selectedTask && deleteTaskMutation.mutate(selectedTask.id)}
+              onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete

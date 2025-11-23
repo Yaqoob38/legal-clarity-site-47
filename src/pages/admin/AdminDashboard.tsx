@@ -17,20 +17,7 @@ const AdminDashboard = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("cases")
-        .select(`
-          id,
-          case_reference,
-          property_address,
-          property_postcode,
-          case_type,
-          stage,
-          progress,
-          client_id,
-          client_email,
-          invitation_token,
-          created_at,
-          profiles!cases_client_id_fkey(full_name)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -156,13 +143,7 @@ const AdminDashboard = () => {
                     </p>
                     <div className="flex items-center gap-4 text-sm">
                       <span className="text-muted-foreground">
-                        Client:{" "}
-                        {caseItem.client_id && 
-                         caseItem.profiles &&
-                         typeof caseItem.profiles === 'object' && 
-                         'full_name' in (caseItem.profiles || {})
-                          ? (caseItem.profiles as { full_name: string }).full_name
-                          : caseItem.client_email || "Not assigned"}
+                        Client: {caseItem.client_email || "Not assigned"}
                       </span>
                       <Badge variant="secondary">{getStageLabel(caseItem.stage)}</Badge>
                     </div>

@@ -19,9 +19,10 @@ export const useTasks = () => {
         .order("order_index", { ascending: true });
 
       if (error) throw error;
-      return data;
+      return data || [];
     },
     enabled: !!userCase?.id,
+    staleTime: 10000,
   });
 
   const updateTask = useMutation({

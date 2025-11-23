@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 const signupSchema = z.object({
   name: z.string()
@@ -29,6 +29,7 @@ type SignupFormData = z.infer<typeof signupSchema>;
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { signUp, user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -39,23 +40,28 @@ const Signup = () => {
     resolver: zodResolver(signupSchema),
   });
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
   const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true);
     try {
-      // Simulate signup logic
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success("Account created successfully!");
-      // Navigate to home or dashboard after successful signup
-      setTimeout(() => navigate("/"), 1500);
-    } catch (error) {
-      toast.error("Failed to create account. Please try again.");
+      const { error } = await signUp(data.email, data.password, data.name);
+      if (!error) {
+        setTimeout(() => navigate("/"), 1500);
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleSignup = () => {
-    toast.info("Google sign-up coming soon!");
+    // Google OAuth will be configured separately
+    alert("Google sign-up coming soon!");
   };
 
   return (

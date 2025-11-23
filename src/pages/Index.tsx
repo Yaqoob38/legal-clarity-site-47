@@ -5,10 +5,12 @@ import {
   Circle, CheckCircle, ArrowRight, MapPin, Phone, Mail, Linkedin, 
   Twitter, Facebook 
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navbarBg, setNavbarBg] = useState(false);
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,9 +52,23 @@ const Index = () => {
 
             {/* CTAs */}
             <div className="hidden md:flex items-center space-x-4">
-              <a href="#" className="text-white text-sm hover:text-brand-gold transition-colors flex items-center gap-2">
-                <Lock className="w-4 h-4" /> Client Login
-              </a>
+              {user ? (
+                <>
+                  <span className="text-white text-sm flex items-center gap-2">
+                    <Lock className="w-4 h-4" /> {user.email}
+                  </span>
+                  <button 
+                    onClick={signOut}
+                    className="text-white text-sm hover:text-brand-gold transition-colors"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <a href="/signin" className="text-white text-sm hover:text-brand-gold transition-colors flex items-center gap-2">
+                  <Lock className="w-4 h-4" /> Client Login
+                </a>
+              )}
               <a href="#contact" className="bg-brand-gold hover:bg-brand-goldLight text-white px-6 py-2.5 text-sm uppercase tracking-wide transition-colors duration-300">
                 Contact Us
               </a>
@@ -79,9 +95,23 @@ const Index = () => {
               <a href="#portal" className="block px-3 py-2 text-base font-medium text-white hover:bg-brand-slate">Client Portal</a>
               <a href="#contact" className="block px-3 py-2 text-base font-medium text-white hover:bg-brand-slate">Contact</a>
               <div className="pt-4 border-t border-white/10 mt-4">
-                <a href="#" className="block px-3 py-2 text-base font-medium text-brand-gold hover:text-white flex items-center gap-2">
-                  <Lock className="w-4 h-4" /> Client Login
-                </a>
+                {user ? (
+                  <>
+                    <span className="block px-3 py-2 text-base font-medium text-white">
+                      {user.email}
+                    </span>
+                    <button 
+                      onClick={signOut}
+                      className="block w-full text-left px-3 py-2 text-base font-medium text-brand-gold hover:text-white"
+                    >
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <a href="/signin" className="block px-3 py-2 text-base font-medium text-brand-gold hover:text-white flex items-center gap-2">
+                    <Lock className="w-4 h-4" /> Client Login
+                  </a>
+                )}
               </div>
             </div>
           </div>
@@ -290,8 +320,8 @@ const Index = () => {
                 </div>
               </div>
 
-              <a href="#" className="inline-flex justify-center items-center px-8 py-3 border border-transparent text-base font-medium text-white bg-brand-navy hover:bg-brand-slate transition-colors shadow-lg">
-                Login to Portal
+              <a href={user ? "#" : "/signin"} className="inline-flex justify-center items-center px-8 py-3 border border-transparent text-base font-medium text-white bg-brand-navy hover:bg-brand-slate transition-colors shadow-lg">
+                {user ? "View Portal" : "Login to Portal"}
               </a>
             </div>
             

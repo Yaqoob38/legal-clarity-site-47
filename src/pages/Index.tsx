@@ -54,9 +54,9 @@ const Index = () => {
             <div className="hidden md:flex items-center space-x-4">
               {user ? (
                 <>
-                  <span className="text-white text-sm flex items-center gap-2">
-                    <Lock className="w-4 h-4" /> {user.email}
-                  </span>
+                  <a href="/dashboard" className="text-white text-sm hover:text-brand-gold transition-colors flex items-center gap-2">
+                    <Lock className="w-4 h-4" /> My Portal
+                  </a>
                   <button 
                     onClick={signOut}
                     className="text-white text-sm hover:text-brand-gold transition-colors"
@@ -97,9 +97,9 @@ const Index = () => {
               <div className="pt-4 border-t border-white/10 mt-4">
                 {user ? (
                   <>
-                    <span className="block px-3 py-2 text-base font-medium text-white">
-                      {user.email}
-                    </span>
+                    <a href="/dashboard" className="block px-3 py-2 text-base font-medium text-white hover:bg-brand-slate flex items-center gap-2">
+                      <Lock className="w-4 h-4" /> My Portal
+                    </a>
                     <button 
                       onClick={signOut}
                       className="block w-full text-left px-3 py-2 text-base font-medium text-brand-gold hover:text-white"
@@ -320,7 +320,7 @@ const Index = () => {
                 </div>
               </div>
 
-              <a href={user ? "#" : "/signin"} className="inline-flex justify-center items-center px-8 py-3 border border-transparent text-base font-medium text-white bg-brand-navy hover:bg-brand-slate transition-colors shadow-lg">
+              <a href={user ? "/dashboard" : "/signin"} className="inline-flex justify-center items-center px-8 py-3 border border-transparent text-base font-medium text-white bg-brand-navy hover:bg-brand-slate transition-colors shadow-lg">
                 {user ? "View Portal" : "Login to Portal"}
               </a>
             </div>

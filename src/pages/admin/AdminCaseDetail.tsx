@@ -40,7 +40,10 @@ const AdminCaseDetail = () => {
   const { caseId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { caseData, tasks, isLoading, getTasksByStage } = useAdminCase(caseId!);
+  
+  console.log("📋 AdminCaseDetail - caseId:", caseId);
+  
+  const { caseData, tasks, isLoading, getTasksByStage } = useAdminCase(caseId);
   const [addTaskDialog, setAddTaskDialog] = useState(false);
   const [editTaskDialog, setEditTaskDialog] = useState(false);
   const [deleteTaskDialog, setDeleteTaskDialog] = useState(false);
@@ -193,8 +196,11 @@ const AdminCaseDetail = () => {
     );
   }
 
+  console.log("📊 Case data:", caseData);
+  console.log("📝 Tasks:", tasks?.length);
+  
   const clientName = caseData?.client_id 
-    ? (caseData?.profiles as any)?.full_name || "Unknown Client"
+    ? ((caseData as any)?.profiles?.full_name || "Unknown Client")
     : (caseData?.client_email ? `Invited: ${caseData.client_email}` : "No Client");
 
   return (

@@ -233,6 +233,7 @@ export type Database = {
           case_id: string
           created_at: string
           description: string | null
+          downloadable_documents: string[] | null
           id: string
           notes: string | null
           order_index: number
@@ -246,6 +247,7 @@ export type Database = {
           case_id: string
           created_at?: string
           description?: string | null
+          downloadable_documents?: string[] | null
           id?: string
           notes?: string | null
           order_index?: number
@@ -259,6 +261,7 @@ export type Database = {
           case_id?: string
           created_at?: string
           description?: string | null
+          downloadable_documents?: string[] | null
           id?: string
           notes?: string | null
           order_index?: number

@@ -120,7 +120,7 @@ const TaskDetail = () => {
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto bg-brand-gray p-8">
-          <div className="max-w-4xl mx-auto space-y-6">
+          <div className="max-w-6xl mx-auto space-y-6">
             
             {/* Task Description */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -130,52 +130,130 @@ const TaskDetail = () => {
               </p>
             </div>
 
-            {/* Document Upload */}
-            {!isLocked && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-serif font-bold text-brand-navy mb-3">Upload Documents</h2>
-                
-                {task.required_documents && task.required_documents.length > 0 && (
-                  <div className="mb-4">
-                    <p className="text-sm text-gray-600 mb-2">Required documents:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {task.required_documents.map((doc, idx) => (
-                        <span
-                          key={idx}
-                          className="px-3 py-1 bg-brand-navy/10 text-brand-navy text-xs rounded-full"
-                        >
-                          {doc}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div
-                  onDrop={handleDrop}
-                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                  onDragLeave={() => setIsDragging(false)}
-                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                    isDragging ? "border-brand-gold bg-brand-gold/5" : "border-gray-200 hover:border-brand-gold"
-                  }`}
-                >
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-sm text-gray-600 mb-2">
-                    Drag and drop files here, or click to browse
+            {/* Two-Column Layout for tasks with downloadable documents */}
+            {!isLocked && task.downloadable_documents && task.downloadable_documents.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left: Downloadable Documents */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h2 className="text-lg font-serif font-bold text-brand-navy mb-4">Download & Sign</h2>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Download the required documents, complete and sign them, then upload using the form on the right.
                   </p>
+                  <div className="space-y-3">
+                    {task.downloadable_documents.map((doc, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-brand-gold transition-colors"
+                      >
+                        <div className="w-10 h-10 bg-brand-gold/10 rounded flex items-center justify-center flex-shrink-0">
+                          <FileText className="w-5 h-5 text-brand-gold" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-brand-navy">{doc}</p>
+                          <p className="text-xs text-gray-500">PDF Document</p>
+                        </div>
+                        <button className="px-4 py-2 bg-brand-navy hover:bg-brand-slate text-white text-sm rounded-lg transition-colors">
+                          Download
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right: Document Upload */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h2 className="text-lg font-serif font-bold text-brand-navy mb-4">Upload Documents</h2>
                   
-                  <label className="inline-flex items-center px-6 py-3 bg-brand-navy hover:bg-brand-slate text-white rounded-lg cursor-pointer transition-colors">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Choose Files
-                    <input
-                      type="file"
-                      multiple
-                      onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
-                      className="hidden"
-                    />
-                  </label>
+                  {task.required_documents && task.required_documents.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-600 mb-2">Required documents:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {task.required_documents.map((doc, idx) => (
+                          <span
+                            key={idx}
+                            className="px-3 py-1 bg-brand-navy/10 text-brand-navy text-xs rounded-full"
+                          >
+                            {doc}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div
+                    onDrop={handleDrop}
+                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                    onDragLeave={() => setIsDragging(false)}
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                      isDragging ? "border-brand-gold bg-brand-gold/5" : "border-gray-200 hover:border-brand-gold"
+                    }`}
+                  >
+                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-sm text-gray-600 mb-2">
+                      Drag and drop files here, or click to browse
+                    </p>
+                    
+                    <label className="inline-flex items-center px-6 py-3 bg-brand-navy hover:bg-brand-slate text-white rounded-lg cursor-pointer transition-colors">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Choose Files
+                      <input
+                        type="file"
+                        multiple
+                        onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
                 </div>
               </div>
+            ) : (
+              /* Standard Upload Section for tasks without downloadable documents */
+              !isLocked && (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h2 className="text-lg font-serif font-bold text-brand-navy mb-3">Upload Documents</h2>
+                  
+                  {task.required_documents && task.required_documents.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-600 mb-2">Required documents:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {task.required_documents.map((doc, idx) => (
+                          <span
+                            key={idx}
+                            className="px-3 py-1 bg-brand-navy/10 text-brand-navy text-xs rounded-full"
+                          >
+                            {doc}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div
+                    onDrop={handleDrop}
+                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                    onDragLeave={() => setIsDragging(false)}
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                      isDragging ? "border-brand-gold bg-brand-gold/5" : "border-gray-200 hover:border-brand-gold"
+                    }`}
+                  >
+                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-sm text-gray-600 mb-2">
+                      Drag and drop files here, or click to browse
+                    </p>
+                    
+                    <label className="inline-flex items-center px-6 py-3 bg-brand-navy hover:bg-brand-slate text-white rounded-lg cursor-pointer transition-colors">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Choose Files
+                      <input
+                        type="file"
+                        multiple
+                        onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+              )
             )}
 
             {/* Uploaded Documents */}

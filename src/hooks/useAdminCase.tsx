@@ -31,8 +31,13 @@ export const useAdminCase = (caseId: string | undefined) => {
           .select("full_name, phone")
           .eq("id", caseData.client_id)
           .maybeSingle();
-        
-        return { ...caseData, profiles: profileData };
+
+        console.log("✅ Profile data:", profileData);
+        return {
+          ...caseData,
+          client_name: profileData?.full_name || null,
+          client_phone: profileData?.phone || null,
+        };
       }
       
       console.log("✅ Fetched case data:", caseData);
@@ -86,6 +91,7 @@ export const useAdminCase = (caseId: string | undefined) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-case-tasks", caseId] });
+      queryClient.invalidateQueries({ queryKey: ["admin-case"] });
     },
   });
 

@@ -52,7 +52,7 @@ const Signup = () => {
   const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true);
     try {
-      const { error } = await signUp(data.email, data.password, data.name);
+      const { error } = await signUp(data.email, data.password, data.name, inviteToken);
       if (!error) {
         setTimeout(() => navigate("/dashboard"), 1500);
       }

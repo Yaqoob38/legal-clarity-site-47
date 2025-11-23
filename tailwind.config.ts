@@ -13,7 +13,18 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        serif: ['"Playfair Display"', 'serif'],
+        sans: ['"Lato"', 'sans-serif'],
+      },
       colors: {
+        brand: {
+          navy: '#0f172a',
+          slate: '#1e293b',
+          gold: '#C5A059',
+          goldLight: '#E5C578',
+          cream: '#f8fafc',
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

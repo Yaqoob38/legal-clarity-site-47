@@ -15,17 +15,24 @@ const AdminDashboard = () => {
   const { data: cases, isLoading } = useQuery({
     queryKey: ["admin-cases"],
     queryFn: async () => {
+      console.log("Fetching admin cases...");
       const { data, error } = await supabase
         .from("cases")
         .select(`
           *,
-          profiles:client_id(full_name)
+          profiles(full_name)
         `)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching cases:", error);
+        throw error;
+      }
+      console.log("Fetched cases:", data?.length);
       return data;
     },
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const handleSignOut = async () => {

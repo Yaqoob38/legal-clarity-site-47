@@ -19,12 +19,15 @@ const AdminCaseDetail = () => {
         .from("cases")
         .select(`
           *,
-          profiles:client_id(full_name, phone)
+          profiles(full_name, phone)
         `)
         .eq("id", caseId!)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching case:", error);
+        throw error;
+      }
       return data;
     },
   });

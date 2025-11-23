@@ -66,9 +66,13 @@ const Dashboard = () => {
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">Property</span>
                 <div className="flex items-center gap-2">
                   <Home className="w-5 h-5 text-brand-gold" />
-                  <span className="text-lg font-serif font-medium text-brand-navy">{userCase?.property_address || "49 Russell Square"}</span>
+                  <span className="text-lg font-serif font-medium text-brand-navy">
+                    {userCase?.property_address || "Loading..."}
+                  </span>
                 </div>
-                <p className="text-xs text-gray-400 mt-1 pl-7">{userCase?.property_postcode || "London, WC1B 4JP"}</p>
+                <p className="text-xs text-gray-400 mt-1 pl-7">
+                  {userCase?.property_postcode || ""}
+                </p>
               </div>
 
               {/* Case Ref */}
@@ -76,9 +80,13 @@ const Dashboard = () => {
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">Case Reference</span>
                 <div className="flex items-center gap-2">
                   <FileText className="w-5 h-5 text-brand-gold" />
-                  <span className="text-lg font-mono font-medium text-brand-navy">#{userCase?.case_reference || "REF-2294"}</span>
+                  <span className="text-lg font-mono font-medium text-brand-navy">
+                    #{userCase?.case_reference || "Loading..."}
+                  </span>
                 </div>
-                <p className="text-xs text-gray-400 mt-1 pl-7">{userCase?.case_type || "Conveyancing - Sale"}</p>
+                <p className="text-xs text-gray-400 mt-1 pl-7">
+                  {userCase?.case_type || ""}
+                </p>
               </div>
 
               {/* Stage */}

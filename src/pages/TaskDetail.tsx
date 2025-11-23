@@ -1,10 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Upload, FileText, Check, X, Download } from "lucide-react";
+import { ArrowLeft, Upload, FileText, Check, X, Download, ExternalLink } from "lucide-react";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { useTasks } from "@/hooks/useTasks";
 import { useDocuments } from "@/hooks/useDocuments";
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import thirdfortLogo from "@/assets/thirdfort-logo.png";
 
 const TaskDetail = () => {
   const { taskId } = useParams();
@@ -101,6 +102,23 @@ const TaskDetail = () => {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    if (status === "PENDING_REVIEW") return "AWAITING APPROVAL";
+    return status.replace(/_/g, " ");
+  };
+
+  const handleThirdfortClick = async () => {
+    if (!task) return;
+    
+    await updateTask.mutateAsync({
+      taskId: task.id,
+      updates: { status: "PENDING_REVIEW" }
+    });
+    
+    window.open("https://www.thirdfort.com/", "_blank");
+  };
+
+  const isThirdfortTask = task.title.toLowerCase().includes("thirdfort");
   const isLocked = task.status === "LOCKED";
 
   return (
@@ -125,7 +143,7 @@ const TaskDetail = () => {
             </div>
           </div>
           <div className={`px-4 py-2 rounded-full ${getStatusColor(task.status)} text-white text-sm font-medium`}>
-            {task.status.replace(/_/g, " ")}
+            {getStatusLabel(task.status)}
           </div>
         </header>
 
@@ -141,8 +159,55 @@ const TaskDetail = () => {
               </p>
             </div>
 
-            {/* Two-Column Layout for tasks with downloadable documents */}
-            {!isLocked && task.downloadable_documents && task.downloadable_documents.length > 0 ? (
+            {/* Awaiting Approval Banner */}
+            {task.status === "PENDING_REVIEW" && (
+              <div className="bg-orange-50 border border-orange-200 rounded-xl p-6">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Check className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-serif font-bold text-orange-900 mb-1">Awaiting Approval</h3>
+                    <p className="text-orange-800">
+                      This task has been submitted and is currently awaiting approval from your case administrator. You will be notified once it has been reviewed.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Thirdfort Task Special UI */}
+            {isThirdfortTask && !isLocked ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12">
+                <div className="max-w-xl mx-auto flex flex-col items-center text-center space-y-6">
+                  <img 
+                    src={thirdfortLogo} 
+                    alt="Thirdfort" 
+                    className="h-20 w-auto object-contain"
+                  />
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-serif font-bold text-brand-navy">Complete Your AML Check</h3>
+                    <p className="text-gray-600">
+                      Click the button below to be redirected to Thirdfort where you can complete your Anti-Money Laundering verification check securely.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={handleThirdfortClick}
+                    disabled={task.status === "PENDING_REVIEW" || task.status === "COMPLETE"}
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-brand-navy hover:bg-brand-slate disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-lg font-medium"
+                  >
+                    {task.status === "PENDING_REVIEW" || task.status === "COMPLETE" 
+                      ? "AML Check Submitted" 
+                      : "Start AML Check"
+                    }
+                    {task.status !== "PENDING_REVIEW" && task.status !== "COMPLETE" && (
+                      <ExternalLink className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : !isLocked && task.downloadable_documents && task.downloadable_documents.length > 0 ? (
+              /* Two-Column Layout for tasks with downloadable documents */
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Left: Downloadable Documents */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -221,9 +286,8 @@ const TaskDetail = () => {
                   </div>
                 </div>
               </div>
-            ) : (
+            ) : !isLocked && (
               /* Standard Upload Section for tasks without downloadable documents */
-              !isLocked && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                   <h2 className="text-lg font-serif font-bold text-brand-navy mb-3">Upload Documents</h2>
                   
@@ -268,8 +332,7 @@ const TaskDetail = () => {
                     </label>
                   </div>
                 </div>
-              )
-            )}
+              )}
 
             {/* Uploaded Documents */}
             {taskDocuments.length > 0 && (

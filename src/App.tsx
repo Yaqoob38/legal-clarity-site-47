@@ -22,6 +22,7 @@ import AdminSignup from "./pages/admin/AdminSignup";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminNewCase from "./pages/admin/AdminNewCase";
 import AdminCaseDetail from "./pages/admin/AdminCaseDetail";
+import AdminEditCase from "./pages/admin/AdminEditCase";
 
 const queryClient = new QueryClient();
 
@@ -109,6 +110,14 @@ const App = () => (
               element={
                 <AdminProtectedRoute>
                   <AdminCaseDetail />
+                </AdminProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/cases/:caseId/edit"
+              element={
+                <AdminProtectedRoute>
+                  <AdminEditCase />
                 </AdminProtectedRoute>
               }
             />

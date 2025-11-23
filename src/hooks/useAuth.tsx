@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       
       toast.success("Signed in successfully!");
-      navigate("/");
+      // Don't auto-navigate here - let the calling component handle it
       return { error: null };
     } catch (error: any) {
       toast.error("An unexpected error occurred");

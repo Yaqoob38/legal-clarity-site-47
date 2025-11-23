@@ -32,14 +32,17 @@ const SignIn = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate("/");
+      navigate("/dashboard");
     }
   }, [user, navigate]);
 
   const onSubmit = async (data: SigninFormData) => {
     setIsLoading(true);
     try {
-      await signIn(data.email, data.password);
+      const { error } = await signIn(data.email, data.password);
+      if (!error) {
+        navigate("/dashboard");
+      }
     } finally {
       setIsLoading(false);
     }

@@ -34,7 +34,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-          <Route path="/" element={<AdminRedirect />} />
+          <Route path="/" element={<Index />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin" element={<SignIn />} />
             <Route 

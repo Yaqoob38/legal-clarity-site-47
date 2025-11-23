@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   Menu, ChevronDown, Lock, Building2, Briefcase, Gem, Globe, 
   UploadCloud, Activity, ShieldCheck, Smartphone, CheckCircle2, 
@@ -6,11 +7,25 @@ import {
   Twitter, Facebook 
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navbarBg, setNavbarBg] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
+  const { isAdmin, isLoading: adminLoading } = useAdmin();
+
+  // Redirect logged-in users to their dashboard
+  useEffect(() => {
+    if (!authLoading && !adminLoading && user) {
+      if (isAdmin) {
+        navigate("/admin/dashboard", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [user, isAdmin, authLoading, adminLoading, navigate]);
 
   useEffect(() => {
     const handleScroll = () => {

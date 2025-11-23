@@ -175,12 +175,14 @@ const AdminDashboard = () => {
                   key={caseItem.id}
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors"
                 >
-                  <div
-                    className="flex-1 cursor-pointer"
-                    onClick={() => navigate(`/admin/cases/${caseItem.id}`)}
-                  >
+                  <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold">{caseItem.case_reference}</h3>
+                      <h3 
+                        className="font-semibold cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => navigate(`/admin/cases/${caseItem.id}`)}
+                      >
+                        {caseItem.case_reference}
+                      </h3>
                       {!caseItem.client_id && (
                         <Badge variant="outline">Pending Invite</Badge>
                       )}

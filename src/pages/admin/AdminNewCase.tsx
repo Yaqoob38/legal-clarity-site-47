@@ -54,8 +54,9 @@ const AdminNewCase = () => {
 
       if (caseError) throw caseError;
 
-      // Create tasks for the case
+      // Create tasks for all stages
       const { error: tasksError } = await supabase.from("tasks").insert([
+        // STAGE 1 TASKS
         {
           case_id: caseData.id,
           stage: "STAGE_1",
@@ -83,6 +84,71 @@ const AdminNewCase = () => {
           order_index: 2,
           required_documents: ["Completed Client Information Form"],
           downloadable_documents: ["Client_Information_Form.pdf", "ID_Verification_Guide.pdf"],
+        },
+        // STAGE 2 TASKS
+        {
+          case_id: caseData.id,
+          stage: "STAGE_2",
+          title: "Property Information Form",
+          description: "Complete detailed property information form.",
+          status: "LOCKED",
+          order_index: 3,
+          required_documents: ["Property Information Form"],
+          downloadable_documents: ["Property_Form.pdf"],
+        },
+        {
+          case_id: caseData.id,
+          stage: "STAGE_2",
+          title: "Review Draft Contract",
+          description: "Review and approve the draft contract documents.",
+          status: "LOCKED",
+          order_index: 4,
+          downloadable_documents: ["Draft_Contract.pdf"],
+        },
+        {
+          case_id: caseData.id,
+          stage: "STAGE_2",
+          title: "Title Deed Verification",
+          description: "Verify property title deeds and ownership.",
+          status: "LOCKED",
+          order_index: 5,
+        },
+        {
+          case_id: caseData.id,
+          stage: "STAGE_2",
+          title: "Search Results Review",
+          description: "Review local authority and environmental search results.",
+          status: "LOCKED",
+          order_index: 6,
+          downloadable_documents: ["Search_Results.pdf"],
+        },
+        // STAGE 3 TASKS
+        {
+          case_id: caseData.id,
+          stage: "STAGE_3",
+          title: "Sign Final Contract",
+          description: "Sign the final contract and exchange documents.",
+          status: "LOCKED",
+          order_index: 7,
+          required_documents: ["Signed Contract"],
+        },
+        {
+          case_id: caseData.id,
+          stage: "STAGE_3",
+          title: "Complete Transfer Documents",
+          description: "Sign and return transfer documentation.",
+          status: "LOCKED",
+          order_index: 8,
+          required_documents: ["Transfer Documents"],
+        },
+        {
+          case_id: caseData.id,
+          stage: "STAGE_3",
+          title: "Completion Statement",
+          description: "Review and approve the completion statement.",
+          status: "LOCKED",
+          order_index: 9,
+          downloadable_documents: ["Completion_Statement.pdf"],
         },
       ]);
 

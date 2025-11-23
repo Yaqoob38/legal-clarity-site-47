@@ -15,7 +15,7 @@ export const useCase = () => {
         .from("cases")
         .select("*")
         .eq("client_id", user.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;

@@ -29,6 +29,27 @@ const Dashboard = () => {
       </div>
     );
   }
+
+  // Show message if no case is assigned
+  if (!userCase) {
+    return (
+      <div className="bg-brand-gray h-screen flex overflow-hidden">
+        <DashboardSidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center max-w-md px-4">
+            <Home className="w-16 h-16 text-brand-gold mx-auto mb-4" />
+            <h2 className="text-2xl font-serif font-bold text-brand-navy mb-2">Welcome to Your Portal</h2>
+            <p className="text-gray-600 mb-4">
+              Your case is being set up by our team. You'll be notified once everything is ready and you can start tracking your progress.
+            </p>
+            <p className="text-sm text-gray-500">
+              If you have any questions, please contact your solicitor.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="bg-brand-gray font-sans text-brand-navy antialiased h-screen flex overflow-hidden">
       {/* Sidebar Navigation */}

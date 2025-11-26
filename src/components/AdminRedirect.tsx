@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useAuth } from "@/hooks/useAuth";
+import Index from "@/pages/Index";
 
 const AdminRedirect = () => {
   const navigate = useNavigate();
@@ -18,6 +19,12 @@ const AdminRedirect = () => {
     }
   }, [user, isAdmin, authLoading, adminLoading, navigate]);
 
+  // Show Index page for unauthenticated users
+  if (!authLoading && !user) {
+    return <Index />;
+  }
+
+  // Show loading state while checking authentication and role
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">

@@ -4,11 +4,13 @@ import NotificationsPanel from "@/components/NotificationsPanel";
 import { useNavigate } from "react-router-dom";
 import { useCase } from "@/hooks/useCase";
 import { useTasks } from "@/hooks/useTasks";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { userCase, isLoading: caseLoading } = useCase();
   const { tasks, isLoading: tasksLoading, getTasksByStage } = useTasks();
+  const { t } = useLanguage();
 
   const stage1Tasks = getTasksByStage("STAGE_1");
   const stage2Tasks = getTasksByStage("STAGE_2");
@@ -23,7 +25,7 @@ const Dashboard = () => {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-brand-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading...</p>
+            <p className="text-gray-600">{t('dashboard.loading')}</p>
           </div>
         </div>
       </div>
@@ -38,12 +40,12 @@ const Dashboard = () => {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center max-w-md px-4">
             <Home className="w-16 h-16 text-brand-gold mx-auto mb-4" />
-            <h2 className="text-2xl font-serif font-bold text-brand-navy mb-2">Welcome to Your Portal</h2>
+            <h2 className="text-2xl font-serif font-bold text-brand-navy mb-2">{t('dashboard.welcome')}</h2>
             <p className="text-gray-600 mb-4">
-              Your case is being set up by our team. You'll be notified once everything is ready and you can start tracking your progress.
+              {t('dashboard.caseSetup')}
             </p>
             <p className="text-sm text-gray-500">
-              If you have any questions, please contact your solicitor.
+              {t('dashboard.contactSolicitor')}
             </p>
           </div>
         </div>

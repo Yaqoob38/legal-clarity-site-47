@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageToggle } from "@/components/LanguageToggle";
 
 const signinSchema = z.object({
   email: z.string()
@@ -19,6 +21,7 @@ type SigninFormData = z.infer<typeof signinSchema>;
 const SignIn = () => {
   const navigate = useNavigate();
   const { signIn, user } = useAuth();
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -68,8 +71,9 @@ const SignIn = () => {
             <a href="/" className="text-gray-500 hover:text-brand-navy text-sm font-medium transition-colors">Home</a>
             <a href="/#contact" className="text-gray-500 hover:text-brand-navy text-sm font-medium transition-colors">Contact</a>
             <div className="flex items-center gap-4">
+              <LanguageToggle />
               <a href="/signup" className="text-brand-navy border border-gray-200 hover:border-brand-gold px-5 py-2 text-sm font-medium rounded transition-all">
-                Sign Up
+                {t('auth.signUp')}
               </a>
             </div>
           </div>
@@ -83,7 +87,7 @@ const SignIn = () => {
           {/* Header */}
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-serif text-brand-navy mb-4">Welcome back</h1>
-            <p className="text-gray-500 text-sm">Sign in to access your client portal.</p>
+            <p className="text-gray-500 text-sm">{t('auth.clientSignIn')}</p>
           </div>
 
           {/* Form */}
@@ -91,11 +95,11 @@ const SignIn = () => {
             
             {/* Email */}
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-bold text-brand-navy">Email*</label>
+              <label htmlFor="email" className="block text-sm font-bold text-brand-navy">{t('auth.email')}*</label>
               <input 
                 type="email" 
                 id="email" 
-                placeholder="Email address"
+                placeholder={t('auth.email')}
                 {...register("email")}
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-brand-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-gold/20 focus:border-brand-gold transition-all"
               />
@@ -106,11 +110,11 @@ const SignIn = () => {
 
             {/* Password */}
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-bold text-brand-navy">Password*</label>
+              <label htmlFor="password" className="block text-sm font-bold text-brand-navy">{t('auth.password')}*</label>
               <input 
                 type="password" 
                 id="password" 
-                placeholder="Enter your password"
+                placeholder={t('auth.password')}
                 {...register("password")}
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-brand-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-gold/20 focus:border-brand-gold transition-all"
               />
@@ -133,7 +137,7 @@ const SignIn = () => {
                 disabled={isLoading}
                 className="w-full bg-brand-gold hover:bg-brand-goldLight text-white font-bold py-3.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                {isLoading ? "Signing In..." : "Sign In"}
+                {isLoading ? `${t('auth.signIn')}...` : t('auth.signIn')}
               </button>
             </div>
 
@@ -142,8 +146,8 @@ const SignIn = () => {
           {/* Footer Link */}
           <div className="text-center pt-4">
             <p className="text-sm text-gray-500">
-              Don't have an account? 
-              <a href="/signup" className="text-brand-gold font-bold hover:text-brand-goldLight underline decoration-2 underline-offset-4 transition-colors ml-1">Sign Up</a>
+              {t('auth.noAccount')}
+              <a href="/signup" className="text-brand-gold font-bold hover:text-brand-goldLight underline decoration-2 underline-offset-4 transition-colors ml-1">{t('auth.signUp')}</a>
             </p>
           </div>
 

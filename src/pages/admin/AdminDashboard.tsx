@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, LogOut, Users, FileText, Clock, Edit, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +24,7 @@ import {
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [caseToDelete, setCaseToDelete] = useState<string | null>(null);
@@ -115,17 +118,18 @@ const AdminDashboard = () => {
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+            <h1 className="text-2xl font-bold">{t('admin.dashboard')}</h1>
             <p className="text-sm text-muted-foreground">Manage cases and clients</p>
           </div>
           <div className="flex items-center gap-2">
+            <LanguageToggle />
             <Button onClick={() => navigate("/admin/cases/new")}>
               <Plus className="w-4 h-4 mr-2" />
-              New Case
+              {t('admin.newCase')}
             </Button>
             <Button variant="outline" onClick={handleSignOut}>
               <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
+              {t('auth.signOut')}
             </Button>
           </div>
         </div>

@@ -52,30 +52,6 @@ const Signup = () => {
   const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true);
     try {
-      // Validate invitation token if provided
-      if (inviteToken) {
-        const { supabase } = await import("@/integrations/supabase/client");
-        const { data: caseData, error: caseError } = await supabase
-          .from("cases")
-          .select("id, client_id")
-          .eq("invitation_token", inviteToken)
-          .maybeSingle();
-        
-        if (caseError || !caseData) {
-          const { toast } = await import("sonner");
-          toast.error("Invalid invitation link. Please contact your solicitor.");
-          setIsLoading(false);
-          return;
-        }
-        
-        if (caseData.client_id) {
-          const { toast } = await import("sonner");
-          toast.error("This invitation has already been used. Please contact your solicitor.");
-          setIsLoading(false);
-          return;
-        }
-      }
-      
       const { error } = await signUp(data.email, data.password, data.name, inviteToken);
       if (!error) {
         setTimeout(() => navigate("/dashboard"), 1500);

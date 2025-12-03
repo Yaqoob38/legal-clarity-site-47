@@ -3,12 +3,14 @@ import { Send } from "lucide-react";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { useMessages } from "@/hooks/useMessages";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Messages = () => {
   const { messages, isLoading, sendMessage } = useMessages();
   const { user } = useAuth();
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -34,7 +36,7 @@ const Messages = () => {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-brand-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading messages...</p>
+            <p className="text-gray-600">{t('messages.loadingMessages')}</p>
           </div>
         </div>
       </div>
@@ -49,8 +51,8 @@ const Messages = () => {
         {/* Top Header */}
         <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 flex-shrink-0">
           <div>
-            <h1 className="text-2xl font-serif text-brand-navy">Messages</h1>
-            <p className="text-xs text-gray-500 uppercase tracking-widest">Communicate With Your Solicitor</p>
+            <h1 className="text-2xl font-serif text-brand-navy">{t('messages.title')}</h1>
+            <p className="text-xs text-gray-500 uppercase tracking-widest">{t('messages.communicateWithSolicitor')}</p>
           </div>
         </header>
 
@@ -62,8 +64,8 @@ const Messages = () => {
                 <div className="w-16 h-16 bg-brand-navy/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Send className="w-8 h-8 text-brand-navy" />
                 </div>
-                <p className="text-gray-500 mb-2">No messages yet</p>
-                <p className="text-sm text-gray-400">Start a conversation with your solicitor</p>
+                <p className="text-gray-500 mb-2">{t('messages.noMessages')}</p>
+                <p className="text-sm text-gray-400">{t('messages.startConversation')}</p>
               </div>
             </div>
           ) : (
@@ -88,7 +90,7 @@ const Messages = () => {
                       </div>
                       <div className={`flex items-center gap-2 mt-1 px-2 ${isOwnMessage ? "justify-end" : "justify-start"}`}>
                         <span className="text-xs text-gray-400">
-                          {isOwnMessage ? "You" : "Riseam Sharples"}
+                          {isOwnMessage ? t('messages.you') : "Riseam Sharples"}
                         </span>
                         <span className="text-xs text-gray-300">•</span>
                         <span className="text-xs text-gray-400">
@@ -115,7 +117,7 @@ const Messages = () => {
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type your message..."
+                placeholder={t('messages.type')}
                 className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-brand-gold"
               />
               <button
@@ -124,7 +126,7 @@ const Messages = () => {
                 className="px-6 py-3 bg-brand-navy hover:bg-brand-slate text-white rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Send className="w-4 h-4" />
-                Send
+                {t('messages.send')}
               </button>
             </div>
           </form>

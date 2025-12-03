@@ -2,11 +2,13 @@ import { Bell, X } from "lucide-react";
 import { useState } from "react";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const NotificationsPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const handleNotificationClick = (notification: any) => {
     markAsRead.mutate(notification.id);
@@ -40,9 +42,9 @@ const NotificationsPanel = () => {
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <div>
-                <h3 className="font-serif font-bold text-brand-navy">Notifications</h3>
+                <h3 className="font-serif font-bold text-brand-navy">{t('notifications.title')}</h3>
                 {unreadCount > 0 && (
-                  <p className="text-xs text-gray-500">{unreadCount} unread</p>
+                  <p className="text-xs text-gray-500">{unreadCount} {t('notifications.unread')}</p>
                 )}
               </div>
               <div className="flex items-center gap-2">
@@ -51,7 +53,7 @@ const NotificationsPanel = () => {
                     onClick={() => markAllAsRead.mutate()}
                     className="text-xs text-brand-gold hover:underline"
                   >
-                    Mark all read
+                    {t('notifications.markAllRead')}
                   </button>
                 )}
                 <button
@@ -68,7 +70,7 @@ const NotificationsPanel = () => {
               {notifications.length === 0 ? (
                 <div className="p-8 text-center">
                   <Bell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500">No notifications</p>
+                  <p className="text-gray-500">{t('notifications.noNotifications')}</p>
                 </div>
               ) : (
                 <div>

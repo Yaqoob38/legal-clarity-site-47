@@ -3,37 +3,53 @@ import { useState } from "react";
 import { MoreHorizontal, ChevronDown, LayoutGrid, List, Upload, Check } from "lucide-react";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { useTasks } from "@/hooks/useTasks";
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "COMPLETE":
-      return "bg-green-500/20 text-green-700";
-    case "IN_PROGRESS":
-    case "SUBMITTED":
-      return "bg-brand-gold/20 text-brand-gold";
-    case "PENDING_REVIEW":
-      return "bg-orange-500/20 text-orange-700";
-    case "REJECTED":
-      return "bg-red-500/20 text-red-700";
-    case "LOCKED":
-      return "bg-gray-400/20 text-gray-600";
-    default:
-      return "bg-gray-200 text-gray-600";
-  }
-};
-
-const getStatusLabel = (status: string) => {
-  return status.replace(/_/g, " ");
-};
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Tasks = () => {
   const navigate = useNavigate();
   const { tasks, isLoading, getTasksByStage } = useTasks();
   const [viewMode, setViewMode] = useState<"board" | "list">("board");
+  const { t } = useLanguage();
 
   const stage1Tasks = getTasksByStage("STAGE_1");
   const stage2Tasks = getTasksByStage("STAGE_2");
   const stage3Tasks = getTasksByStage("STAGE_3");
+
+  // Helper to translate task status
+  const translateStatus = (status: string) => {
+    return t(`status.${status}`) || status.replace(/_/g, " ");
+  };
+
+  // Helper to translate task title
+  const translateTaskTitle = (title: string) => {
+    const translated = t(`task.${title}`);
+    return translated !== `task.${title}` ? translated : title;
+  };
+
+  // Helper to translate task description
+  const translateTaskDesc = (desc: string | null) => {
+    if (!desc) return null;
+    const translated = t(`taskDesc.${desc}`);
+    return translated !== `taskDesc.${desc}` ? translated : desc;
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "COMPLETE":
+        return "bg-green-500/20 text-green-700";
+      case "IN_PROGRESS":
+      case "SUBMITTED":
+        return "bg-brand-gold/20 text-brand-gold";
+      case "PENDING_REVIEW":
+        return "bg-orange-500/20 text-orange-700";
+      case "REJECTED":
+        return "bg-red-500/20 text-red-700";
+      case "LOCKED":
+        return "bg-gray-400/20 text-gray-600";
+      default:
+        return "bg-gray-200 text-gray-600";
+    }
+  };
 
   if (isLoading) {
     return (
@@ -42,7 +58,7 @@ const Tasks = () => {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-brand-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading tasks...</p>
+            <p className="text-gray-600">{t('tasks.loadingTasks')}</p>
           </div>
         </div>
       </div>
@@ -57,8 +73,8 @@ const Tasks = () => {
         {/* Top Header */}
         <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 flex-shrink-0">
           <div>
-            <h1 className="text-2xl font-serif text-brand-navy">Tasks</h1>
-            <p className="text-xs text-gray-500 uppercase tracking-widest">Manage Your Case Tasks</p>
+            <h1 className="text-2xl font-serif text-brand-navy">{t('tasks.title')}</h1>
+            <p className="text-xs text-gray-500 uppercase tracking-widest">{t('tasks.manageCaseTasks')}</p>
           </div>
         </header>
 
@@ -68,7 +84,7 @@ const Tasks = () => {
           {/* Task Board Controls */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <h2 className="text-xl font-serif font-bold text-brand-navy">All Tasks</h2>
+              <h2 className="text-xl font-serif font-bold text-brand-navy">{t('tasks.allTasks')}</h2>
               <div className="flex bg-white rounded-lg p-1 border border-gray-200 shadow-sm">
                 <button 
                   onClick={() => setViewMode("board")}
@@ -76,7 +92,7 @@ const Tasks = () => {
                     viewMode === "board" ? "bg-brand-navy text-white shadow-sm" : "text-gray-500 hover:bg-gray-50"
                   }`}
                 >
-                  <LayoutGrid className="w-3 h-3" /> Board View
+                  <LayoutGrid className="w-3 h-3" /> {t('dashboard.boardView')}
                 </button>
                 <button 
                   onClick={() => setViewMode("list")}
@@ -84,14 +100,14 @@ const Tasks = () => {
                     viewMode === "list" ? "bg-brand-navy text-white shadow-sm" : "text-gray-500 hover:bg-gray-50"
                   }`}
                 >
-                  <List className="w-3 h-3" /> List View
+                  <List className="w-3 h-3" /> {t('dashboard.listView')}
                 </button>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400">Filter by:</span>
+              <span className="text-xs text-gray-400">{t('dashboard.filterBy')}</span>
               <button className="flex items-center gap-1 text-xs font-medium text-brand-navy bg-white px-3 py-1.5 rounded border border-gray-200 hover:border-brand-gold transition-colors">
-                Status <ChevronDown className="w-3 h-3" />
+                {t('dashboard.status')} <ChevronDown className="w-3 h-3" />
               </button>
             </div>
           </div>
@@ -105,7 +121,7 @@ const Tasks = () => {
             <div className="w-80 flex-shrink-0 flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <span className="bg-brand-navy/10 text-brand-navy px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">First Stage</span>
+                  <span className="bg-brand-navy/10 text-brand-navy px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">{t('dashboard.firstStage')}</span>
                   <span className="text-gray-400 text-xs font-medium">{stage1Tasks.length}</span>
                 </div>
                 <MoreHorizontal className="w-4 h-4 text-gray-400 cursor-pointer" />
@@ -122,7 +138,7 @@ const Tasks = () => {
                   >
                     <div className="flex justify-between items-start mb-2">
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${getStatusColor(task.status)}`}>
-                        {getStatusLabel(task.status)}
+                        {translateStatus(task.status)}
                       </span>
                       {task.status === "COMPLETE" && (
                         <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
@@ -130,9 +146,9 @@ const Tasks = () => {
                         </div>
                       )}
                     </div>
-                    <h3 className="text-sm font-bold text-brand-navy mb-1">{task.title}</h3>
+                    <h3 className="text-sm font-bold text-brand-navy mb-1">{translateTaskTitle(task.title)}</h3>
                     {task.description && (
-                      <p className="text-xs text-gray-500 line-clamp-2">{task.description}</p>
+                      <p className="text-xs text-gray-500 line-clamp-2">{translateTaskDesc(task.description)}</p>
                     )}
                   </div>
                 ))}
@@ -143,7 +159,7 @@ const Tasks = () => {
             <div className="w-80 flex-shrink-0 flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Second Stage</span>
+                  <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">{t('dashboard.secondStage')}</span>
                   <span className="text-gray-400 text-xs font-medium">{stage2Tasks.length}</span>
                 </div>
                 <MoreHorizontal className="w-4 h-4 text-gray-400 cursor-pointer" />
@@ -160,12 +176,12 @@ const Tasks = () => {
                   >
                     <div className="flex justify-between items-start mb-2">
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${getStatusColor(task.status)}`}>
-                        {getStatusLabel(task.status)}
+                        {translateStatus(task.status)}
                       </span>
                     </div>
-                    <h3 className="text-sm font-bold text-brand-navy mb-1">{task.title}</h3>
+                    <h3 className="text-sm font-bold text-brand-navy mb-1">{translateTaskTitle(task.title)}</h3>
                     {task.description && (
-                      <p className="text-xs text-gray-500 line-clamp-2">{task.description}</p>
+                      <p className="text-xs text-gray-500 line-clamp-2">{translateTaskDesc(task.description)}</p>
                     )}
                   </div>
                 ))}
@@ -176,7 +192,7 @@ const Tasks = () => {
             <div className="w-80 flex-shrink-0 flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Third Stage</span>
+                  <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">{t('dashboard.thirdStage')}</span>
                   <span className="text-gray-400 text-xs font-medium">{stage3Tasks.length}</span>
                 </div>
                 <MoreHorizontal className="w-4 h-4 text-gray-400 cursor-pointer" />
@@ -194,18 +210,18 @@ const Tasks = () => {
                     >
                       <div className="flex justify-between items-start mb-2">
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${getStatusColor(task.status)}`}>
-                          {getStatusLabel(task.status)}
+                          {translateStatus(task.status)}
                         </span>
                       </div>
-                      <h3 className="text-sm font-bold text-brand-navy mb-1">{task.title}</h3>
+                      <h3 className="text-sm font-bold text-brand-navy mb-1">{translateTaskTitle(task.title)}</h3>
                       {task.description && (
-                        <p className="text-xs text-gray-500 line-clamp-2">{task.description}</p>
+                        <p className="text-xs text-gray-500 line-clamp-2">{translateTaskDesc(task.description)}</p>
                       )}
                     </div>
                   ))
                 ) : (
                   <div className="border-2 border-dashed border-gray-200 rounded-lg h-32 flex items-center justify-center">
-                    <span className="text-xs text-gray-400">No tasks visible yet</span>
+                    <span className="text-xs text-gray-400">{t('dashboard.noTasksYet')}</span>
                   </div>
                 )}
               </div>
@@ -218,7 +234,7 @@ const Tasks = () => {
               {/* Stage 1 */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="bg-brand-navy/5 px-6 py-3 border-b border-gray-200">
-                  <h3 className="font-serif font-bold text-brand-navy">First Stage</h3>
+                  <h3 className="font-serif font-bold text-brand-navy">{t('dashboard.firstStage')}</h3>
                 </div>
                 <div className="divide-y divide-gray-100">
                   {stage1Tasks.map((task) => (
@@ -238,14 +254,14 @@ const Tasks = () => {
                           }`} />
                         )}
                         <div className="flex-1">
-                          <h4 className="font-medium text-brand-navy">{task.title}</h4>
+                          <h4 className="font-medium text-brand-navy">{translateTaskTitle(task.title)}</h4>
                           {task.description && (
-                            <p className="text-sm text-gray-500 mt-1">{task.description}</p>
+                            <p className="text-sm text-gray-500 mt-1">{translateTaskDesc(task.description)}</p>
                           )}
                         </div>
                       </div>
                       <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${getStatusColor(task.status)}`}>
-                        {getStatusLabel(task.status)}
+                        {translateStatus(task.status)}
                       </span>
                     </div>
                   ))}
@@ -255,7 +271,7 @@ const Tasks = () => {
               {/* Stage 2 */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="bg-gray-100 px-6 py-3 border-b border-gray-200">
-                  <h3 className="font-serif font-bold text-gray-600">Second Stage</h3>
+                  <h3 className="font-serif font-bold text-gray-600">{t('dashboard.secondStage')}</h3>
                 </div>
                 <div className="divide-y divide-gray-100">
                   {stage2Tasks.map((task) => (
@@ -269,14 +285,14 @@ const Tasks = () => {
                       <div className="flex items-center gap-4 flex-1">
                         <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0" />
                         <div className="flex-1">
-                          <h4 className="font-medium text-brand-navy">{task.title}</h4>
+                          <h4 className="font-medium text-brand-navy">{translateTaskTitle(task.title)}</h4>
                           {task.description && (
-                            <p className="text-sm text-gray-500 mt-1">{task.description}</p>
+                            <p className="text-sm text-gray-500 mt-1">{translateTaskDesc(task.description)}</p>
                           )}
                         </div>
                       </div>
                       <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${getStatusColor(task.status)}`}>
-                        {getStatusLabel(task.status)}
+                        {translateStatus(task.status)}
                       </span>
                     </div>
                   ))}
@@ -286,7 +302,7 @@ const Tasks = () => {
               {/* Stage 3 */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="bg-gray-100 px-6 py-3 border-b border-gray-200">
-                  <h3 className="font-serif font-bold text-gray-600">Third Stage</h3>
+                  <h3 className="font-serif font-bold text-gray-600">{t('dashboard.thirdStage')}</h3>
                 </div>
                 {stage3Tasks.length > 0 ? (
                   <div className="divide-y divide-gray-100">
@@ -301,21 +317,21 @@ const Tasks = () => {
                         <div className="flex items-center gap-4 flex-1">
                           <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0" />
                           <div className="flex-1">
-                            <h4 className="font-medium text-brand-navy">{task.title}</h4>
+                            <h4 className="font-medium text-brand-navy">{translateTaskTitle(task.title)}</h4>
                             {task.description && (
-                              <p className="text-sm text-gray-500 mt-1">{task.description}</p>
+                              <p className="text-sm text-gray-500 mt-1">{translateTaskDesc(task.description)}</p>
                             )}
                           </div>
                         </div>
                         <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${getStatusColor(task.status)}`}>
-                          {getStatusLabel(task.status)}
+                          {translateStatus(task.status)}
                         </span>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="px-6 py-8 text-center text-gray-400">
-                    No tasks visible yet
+                    {t('dashboard.noTasksYet')}
                   </div>
                 )}
               </div>

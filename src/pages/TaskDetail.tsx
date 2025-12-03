@@ -6,6 +6,7 @@ import { useDocuments } from "@/hooks/useDocuments";
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import thirdfortLogo from "@/assets/thirdfort-logo.png";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const TaskDetail = () => {
   const { taskId } = useParams();
@@ -14,9 +15,28 @@ const TaskDetail = () => {
   const { uploadDocument, getDocumentsByTask } = useDocuments();
   const [isDragging, setIsDragging] = useState(false);
   const [notes, setNotes] = useState("");
+  const { t } = useLanguage();
 
   const task = tasks.find((t) => t.id === taskId);
   const taskDocuments = task ? getDocumentsByTask(task.id) : [];
+
+  // Helper to translate task title
+  const translateTaskTitle = (title: string) => {
+    const translated = t(`task.${title}`);
+    return translated !== `task.${title}` ? translated : title;
+  };
+
+  // Helper to translate task description
+  const translateTaskDesc = (desc: string | null) => {
+    if (!desc) return t('taskDetail.noDescription');
+    const translated = t(`taskDesc.${desc}`);
+    return translated !== `taskDesc.${desc}` ? translated : desc;
+  };
+
+  // Helper to translate status
+  const translateStatus = (status: string) => {
+    return t(`status.${status}`) || status.replace(/_/g, " ");
+  };
 
   const handleFileUpload = useCallback(
     async (files: FileList | File[]) => {
@@ -71,12 +91,12 @@ const TaskDetail = () => {
         <DashboardSidebar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <p className="text-gray-600 mb-4">Task not found</p>
+            <p className="text-gray-600 mb-4">{t('taskDetail.taskNotFound')}</p>
             <button
               onClick={() => navigate("/dashboard")}
               className="text-brand-gold hover:underline"
             >
-              Return to Dashboard
+              {t('taskDetail.returnToDashboard')}
             </button>
           </div>
         </div>
@@ -102,11 +122,6 @@ const TaskDetail = () => {
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    if (status === "PENDING_REVIEW") return "AWAITING APPROVAL";
-    return status.replace(/_/g, " ");
-  };
-
   const handleThirdfortClick = async () => {
     if (!task) return;
     
@@ -120,6 +135,14 @@ const TaskDetail = () => {
 
   const isThirdfortTask = task.title.toLowerCase().includes("thirdfort");
   const isLocked = task.status === "LOCKED";
+
+  // Translate stage name
+  const translateStage = (stage: string) => {
+    if (stage === "STAGE_1") return t('dashboard.firstStage');
+    if (stage === "STAGE_2") return t('dashboard.secondStage');
+    if (stage === "STAGE_3") return t('dashboard.thirdStage');
+    return stage.replace("_", " ");
+  };
 
   return (
     <div className="bg-brand-gray h-screen flex overflow-hidden">
@@ -136,14 +159,14 @@ const TaskDetail = () => {
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
             <div>
-              <h1 className="text-2xl font-serif text-brand-navy">{task.title}</h1>
+              <h1 className="text-2xl font-serif text-brand-navy">{translateTaskTitle(task.title)}</h1>
               <p className="text-xs text-gray-500 uppercase tracking-widest">
-                {task.stage.replace("_", " ")}
+                {translateStage(task.stage)}
               </p>
             </div>
           </div>
           <div className={`px-4 py-2 rounded-full ${getStatusColor(task.status)} text-white text-sm font-medium`}>
-            {getStatusLabel(task.status)}
+            {translateStatus(task.status)}
           </div>
         </header>
 
@@ -153,9 +176,9 @@ const TaskDetail = () => {
             
             {/* Task Description */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-serif font-bold text-brand-navy mb-3">Description</h2>
+              <h2 className="text-lg font-serif font-bold text-brand-navy mb-3">{t('taskDetail.description')}</h2>
               <p className="text-gray-600 leading-relaxed">
-                {task.description || "No description provided."}
+                {translateTaskDesc(task.description)}
               </p>
             </div>
 
@@ -167,9 +190,9 @@ const TaskDetail = () => {
                     <Check className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-serif font-bold text-orange-900 mb-1">Awaiting Approval</h3>
+                    <h3 className="text-lg font-serif font-bold text-orange-900 mb-1">{t('taskDetail.awaitingApproval')}</h3>
                     <p className="text-orange-800">
-                      This task has been submitted and is currently awaiting approval from your case administrator. You will be notified once it has been reviewed.
+                      {t('taskDetail.awaitingApprovalDesc')}
                     </p>
                   </div>
                 </div>
@@ -186,9 +209,9 @@ const TaskDetail = () => {
                     className="h-20 w-auto object-contain"
                   />
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-serif font-bold text-brand-navy">Complete Your AML Check</h3>
+                    <h3 className="text-2xl font-serif font-bold text-brand-navy">{t('taskDetail.completeAmlCheck')}</h3>
                     <p className="text-gray-600">
-                      Click the button below to be redirected to Thirdfort where you can complete your Anti-Money Laundering verification check securely.
+                      {t('taskDetail.amlCheckDesc')}
                     </p>
                   </div>
                   <button 
@@ -197,8 +220,8 @@ const TaskDetail = () => {
                     className="inline-flex items-center gap-2 px-8 py-4 bg-brand-navy hover:bg-brand-slate disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-lg font-medium"
                   >
                     {task.status === "PENDING_REVIEW" || task.status === "COMPLETE" 
-                      ? "AML Check Submitted" 
-                      : "Start AML Check"
+                      ? t('taskDetail.amlCheckSubmitted')
+                      : t('taskDetail.startAmlCheck')
                     }
                     {task.status !== "PENDING_REVIEW" && task.status !== "COMPLETE" && (
                       <ExternalLink className="w-5 h-5" />
@@ -211,9 +234,9 @@ const TaskDetail = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Left: Downloadable Documents */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                  <h2 className="text-lg font-serif font-bold text-brand-navy mb-4">Download & Sign</h2>
+                  <h2 className="text-lg font-serif font-bold text-brand-navy mb-4">{t('taskDetail.downloadAndSign')}</h2>
                   <p className="text-sm text-gray-600 mb-4">
-                    Download the required documents, complete and sign them, then upload using the form on the right.
+                    {t('taskDetail.downloadAndSignDesc')}
                   </p>
                   <div className="space-y-3">
                     {task.downloadable_documents.map((doc, idx) => (
@@ -226,14 +249,14 @@ const TaskDetail = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-brand-navy">{doc}</p>
-                          <p className="text-xs text-gray-500">PDF Document</p>
+                          <p className="text-xs text-gray-500">{t('taskDetail.pdfDocument')}</p>
                         </div>
                         <button 
                           onClick={() => handleDownloadDocument(doc)}
                           className="px-4 py-2 bg-brand-navy hover:bg-brand-slate text-white text-sm rounded-lg transition-colors flex items-center gap-2"
                         >
                           <Download className="w-4 h-4" />
-                          Download
+                          {t('taskDetail.download')}
                         </button>
                       </div>
                     ))}
@@ -242,11 +265,11 @@ const TaskDetail = () => {
 
                 {/* Right: Document Upload */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                  <h2 className="text-lg font-serif font-bold text-brand-navy mb-4">Upload Documents</h2>
+                  <h2 className="text-lg font-serif font-bold text-brand-navy mb-4">{t('taskDetail.uploadDocuments')}</h2>
                   
                   {task.required_documents && task.required_documents.length > 0 && (
                     <div className="mb-4">
-                      <p className="text-sm text-gray-600 mb-2">Required documents:</p>
+                      <p className="text-sm text-gray-600 mb-2">{t('taskDetail.requiredDocuments')}</p>
                       <div className="flex flex-wrap gap-2">
                         {task.required_documents.map((doc, idx) => (
                           <span
@@ -270,12 +293,12 @@ const TaskDetail = () => {
                   >
                     <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-sm text-gray-600 mb-2">
-                      Drag and drop files here, or click to browse
+                      {t('taskDetail.dragAndDrop')}
                     </p>
                     
                     <label className="inline-flex items-center px-6 py-3 bg-brand-navy hover:bg-brand-slate text-white rounded-lg cursor-pointer transition-colors">
                       <Upload className="w-4 h-4 mr-2" />
-                      Choose Files
+                      {t('taskDetail.chooseFiles')}
                       <input
                         type="file"
                         multiple
@@ -289,11 +312,11 @@ const TaskDetail = () => {
             ) : !isLocked && (
               /* Standard Upload Section for tasks without downloadable documents */
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                  <h2 className="text-lg font-serif font-bold text-brand-navy mb-3">Upload Documents</h2>
+                  <h2 className="text-lg font-serif font-bold text-brand-navy mb-3">{t('taskDetail.uploadDocuments')}</h2>
                   
                   {task.required_documents && task.required_documents.length > 0 && (
                     <div className="mb-4">
-                      <p className="text-sm text-gray-600 mb-2">Required documents:</p>
+                      <p className="text-sm text-gray-600 mb-2">{t('taskDetail.requiredDocuments')}</p>
                       <div className="flex flex-wrap gap-2">
                         {task.required_documents.map((doc, idx) => (
                           <span
@@ -317,12 +340,12 @@ const TaskDetail = () => {
                   >
                     <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-sm text-gray-600 mb-2">
-                      Drag and drop files here, or click to browse
+                      {t('taskDetail.dragAndDrop')}
                     </p>
                     
                     <label className="inline-flex items-center px-6 py-3 bg-brand-navy hover:bg-brand-slate text-white rounded-lg cursor-pointer transition-colors">
                       <Upload className="w-4 h-4 mr-2" />
-                      Choose Files
+                      {t('taskDetail.chooseFiles')}
                       <input
                         type="file"
                         multiple
@@ -338,7 +361,7 @@ const TaskDetail = () => {
             {taskDocuments.length > 0 && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h2 className="text-lg font-serif font-bold text-brand-navy mb-4">
-                  Uploaded Documents ({taskDocuments.length})
+                  {t('taskDetail.uploadedDocuments')} ({taskDocuments.length})
                 </h2>
                 <div className="space-y-2">
                   {taskDocuments.map((doc) => (
@@ -359,13 +382,13 @@ const TaskDetail = () => {
                         {task.status === "APPROVED" && (
                           <div className="flex items-center gap-1 text-xs text-green-600">
                             <Check className="w-3 h-3" />
-                            Approved
+                            {t('taskDetail.approved')}
                           </div>
                         )}
                         {task.status === "REJECTED" && (
                           <div className="flex items-center gap-1 text-xs text-red-600">
                             <X className="w-3 h-3" />
-                            Rejected
+                            {t('taskDetail.rejected')}
                           </div>
                         )}
                         <a
@@ -374,7 +397,7 @@ const TaskDetail = () => {
                           rel="noopener noreferrer"
                           className="text-xs text-brand-gold hover:underline"
                         >
-                          View
+                          {t('taskDetail.view')}
                         </a>
                       </div>
                     </div>
@@ -386,11 +409,11 @@ const TaskDetail = () => {
             {/* Notes */}
             {!isLocked && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-serif font-bold text-brand-navy mb-3">Notes</h2>
+                <h2 className="text-lg font-serif font-bold text-brand-navy mb-3">{t('taskDetail.notes')}</h2>
                 <textarea
                   value={notes || task.notes || ""}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Add any notes or comments about this task..."
+                  placeholder={t('taskDetail.notesPlaceholder')}
                   rows={4}
                   className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-brand-gold resize-none"
                 />
@@ -398,7 +421,7 @@ const TaskDetail = () => {
                   onClick={handleSaveNotes}
                   className="mt-3 px-6 py-2 bg-brand-navy hover:bg-brand-slate text-white rounded-lg transition-colors"
                 >
-                  Save Notes
+                  {t('taskDetail.saveNotes')}
                 </button>
               </div>
             )}
@@ -409,9 +432,9 @@ const TaskDetail = () => {
                 <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FileText className="w-8 h-8 text-gray-400" />
                 </div>
-                <p className="text-gray-600 mb-2">This task is currently locked</p>
+                <p className="text-gray-600 mb-2">{t('taskDetail.taskLocked')}</p>
                 <p className="text-sm text-gray-500">
-                  Complete the previous stage tasks to unlock this task
+                  {t('taskDetail.completePreviousTasks')}
                 </p>
               </div>
             )}

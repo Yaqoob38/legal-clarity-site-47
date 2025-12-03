@@ -29,9 +29,8 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   });
 
   useEffect(() => {
-    // Update HTML attributes for RTL support
+    // Update HTML lang attribute (keep LTR layout, only translate text)
     document.documentElement.lang = language;
-    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
     
     // Save to localStorage
     localStorage.setItem('language', language);

@@ -2,10 +2,12 @@ import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight } from "luci
 import { useState } from "react";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Calendar = () => {
   const { events, isLoading } = useCalendarEvents();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const { t, language } = useLanguage();
 
   const getEventTypeColor = (type: string) => {
     switch (type) {
@@ -31,6 +33,13 @@ const Calendar = () => {
       default:
         return "text-gray-700 bg-gray-50 border-gray-200";
     }
+  };
+
+  const translateEventType = (type: string) => {
+    if (type === "Deadline") return t('calendar.deadline');
+    if (type === "Completion") return t('calendar.completion');
+    if (type === "Meeting") return t('calendar.meeting');
+    return type;
   };
 
   // Get days in current month
@@ -81,6 +90,10 @@ const Calendar = () => {
     .sort((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime())
     .slice(0, 5);
 
+  const dayNames = language === 'ar' 
+    ? ["أحد", "إثن", "ثلا", "أرب", "خمي", "جمع", "سبت"]
+    : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
   if (isLoading) {
     return (
       <div className="bg-brand-gray h-screen flex overflow-hidden">
@@ -88,7 +101,7 @@ const Calendar = () => {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-brand-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading calendar...</p>
+            <p className="text-gray-600">{t('calendar.loadingCalendar')}</p>
           </div>
         </div>
       </div>
@@ -103,8 +116,8 @@ const Calendar = () => {
         {/* Top Header */}
         <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 flex-shrink-0">
           <div>
-            <h1 className="text-2xl font-serif text-brand-navy">Calendar</h1>
-            <p className="text-xs text-gray-500 uppercase tracking-widest">Key Dates & Deadlines</p>
+            <h1 className="text-2xl font-serif text-brand-navy">{t('calendar.title')}</h1>
+            <p className="text-xs text-gray-500 uppercase tracking-widest">{t('calendar.keyDatesDeadlines')}</p>
           </div>
         </header>
 
@@ -118,7 +131,7 @@ const Calendar = () => {
                 {/* Calendar Header */}
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-serif font-bold text-brand-navy">
-                    {currentDate.toLocaleDateString("en-GB", { month: "long", year: "numeric" })}
+                    {currentDate.toLocaleDateString(language === 'ar' ? "ar-SA" : "en-GB", { month: "long", year: "numeric" })}
                   </h2>
                   <div className="flex gap-2">
                     <button
@@ -138,7 +151,7 @@ const Calendar = () => {
 
                 {/* Day Headers */}
                 <div className="grid grid-cols-7 mb-2">
-                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                  {dayNames.map((day) => (
                     <div key={day} className="text-center text-xs font-bold text-gray-500 uppercase tracking-wider py-2">
                       {day}
                     </div>
@@ -194,15 +207,15 @@ const Calendar = () => {
                   <div className="flex flex-wrap gap-4 text-xs">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-red-500" />
-                      <span className="text-gray-600">Deadline</span>
+                      <span className="text-gray-600">{t('calendar.deadline')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-green-500" />
-                      <span className="text-gray-600">Completion</span>
+                      <span className="text-gray-600">{t('calendar.completion')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-blue-500" />
-                      <span className="text-gray-600">Meeting</span>
+                      <span className="text-gray-600">{t('calendar.meeting')}</span>
                     </div>
                   </div>
                 </div>
@@ -215,13 +228,13 @@ const Calendar = () => {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 className="font-serif font-bold text-brand-navy mb-4 flex items-center gap-2">
                   <Clock className="w-5 h-5 text-brand-gold" />
-                  Upcoming Events
+                  {t('calendar.upcoming')}
                 </h3>
                 
                 {sortedUpcomingEvents.length === 0 ? (
                   <div className="text-center py-8">
                     <CalendarIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-sm text-gray-500">No upcoming events</p>
+                    <p className="text-sm text-gray-500">{t('calendar.noUpcomingEvents')}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -239,21 +252,21 @@ const Calendar = () => {
                                 {eventDate.getDate()}
                               </div>
                               <div className="text-[10px] text-gray-500 uppercase">
-                                {eventDate.toLocaleDateString("en-GB", { month: "short" })}
+                                {eventDate.toLocaleDateString(language === 'ar' ? "ar-SA" : "en-GB", { month: "short" })}
                               </div>
                             </div>
                             <div className="flex-1 min-w-0">
                               <h4 className="font-medium text-sm text-brand-navy mb-1">{event.title}</h4>
                               <span className={`text-[10px] px-2 py-0.5 rounded-full border uppercase tracking-wider font-bold ${getEventTypeTextColor(event.event_type)}`}>
-                                {event.event_type}
+                                {translateEventType(event.event_type)}
                               </span>
                               {daysUntil <= 7 && (
                                 <p className="text-xs text-brand-gold mt-2 font-medium">
                                   {daysUntil === 0
-                                    ? "Today"
+                                    ? t('calendar.today')
                                     : daysUntil === 1
-                                    ? "Tomorrow"
-                                    : `In ${daysUntil} days`}
+                                    ? t('calendar.tomorrow')
+                                    : t('calendar.inDays').replace('{days}', String(daysUntil))}
                                 </p>
                               )}
                             </div>
@@ -267,20 +280,20 @@ const Calendar = () => {
 
               {/* Summary Stats */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="font-serif font-bold text-brand-navy mb-4">Summary</h3>
+                <h3 className="font-serif font-bold text-brand-navy mb-4">{t('calendar.summary')}</h3>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                    <span className="text-sm text-blue-700 font-medium">Total Events</span>
+                    <span className="text-sm text-blue-700 font-medium">{t('calendar.totalEvents')}</span>
                     <span className="text-xl font-bold text-blue-700">{events.length}</span>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                    <span className="text-sm text-red-700 font-medium">Deadlines</span>
+                    <span className="text-sm text-red-700 font-medium">{t('calendar.deadlines')}</span>
                     <span className="text-xl font-bold text-red-700">
                       {events.filter((e) => e.event_type === "Deadline" && new Date(e.event_date) >= today).length}
                     </span>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <span className="text-sm text-green-700 font-medium">Completions</span>
+                    <span className="text-sm text-green-700 font-medium">{t('calendar.completions')}</span>
                     <span className="text-xl font-bold text-green-700">
                       {events.filter((e) => e.event_type === "Completion").length}
                     </span>

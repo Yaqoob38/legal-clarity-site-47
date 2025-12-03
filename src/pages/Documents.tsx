@@ -4,12 +4,20 @@ import DashboardSidebar from "@/components/DashboardSidebar";
 import { useDocuments } from "@/hooks/useDocuments";
 import { useTasks } from "@/hooks/useTasks";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Documents = () => {
   const { documents, isLoading, uploadDocument, deleteDocument } = useDocuments();
   const { tasks } = useTasks();
   const [selectedTask, setSelectedTask] = useState<string>("");
   const [isDragging, setIsDragging] = useState(false);
+  const { t } = useLanguage();
+
+  // Helper to translate task title
+  const translateTaskTitle = (title: string) => {
+    const translated = t(`task.${title}`);
+    return translated !== `task.${title}` ? translated : title;
+  };
 
   const handleFileUpload = useCallback(
     async (files: FileList | File[]) => {
@@ -58,9 +66,9 @@ const Documents = () => {
   };
 
   const getTaskName = (taskId: string | null) => {
-    if (!taskId) return "General Documents";
+    if (!taskId) return t('documents.generalDocuments');
     const task = tasks.find((t) => t.id === taskId);
-    return task?.title || "Unknown Task";
+    return task ? translateTaskTitle(task.title) : t('documents.generalDocuments');
   };
 
   if (isLoading) {
@@ -70,7 +78,7 @@ const Documents = () => {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-brand-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading documents...</p>
+            <p className="text-gray-600">{t('documents.loadingDocuments')}</p>
           </div>
         </div>
       </div>
@@ -85,8 +93,8 @@ const Documents = () => {
         {/* Top Header */}
         <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 flex-shrink-0">
           <div>
-            <h1 className="text-2xl font-serif text-brand-navy">Documents</h1>
-            <p className="text-xs text-gray-500 uppercase tracking-widest">Manage Your Case Files</p>
+            <h1 className="text-2xl font-serif text-brand-navy">{t('documents.title')}</h1>
+            <p className="text-xs text-gray-500 uppercase tracking-widest">{t('documents.manageCaseFiles')}</p>
           </div>
         </header>
 
@@ -95,21 +103,21 @@ const Documents = () => {
           
           {/* Upload Area */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-            <h2 className="text-lg font-serif font-bold text-brand-navy mb-4">Upload Documents</h2>
+            <h2 className="text-lg font-serif font-bold text-brand-navy mb-4">{t('documents.uploadDocuments')}</h2>
             
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Link to Task (Optional)
+                {t('documents.linkToTask')}
               </label>
               <select
                 value={selectedTask}
                 onChange={(e) => setSelectedTask(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-brand-gold"
               >
-                <option value="">General Documents</option>
+                <option value="">{t('documents.generalDocuments')}</option>
                 {tasks.filter((t) => t.status !== "COMPLETE").map((task) => (
                   <option key={task.id} value={task.id}>
-                    {task.title}
+                    {translateTaskTitle(task.title)}
                   </option>
                 ))}
               </select>
@@ -125,13 +133,13 @@ const Documents = () => {
             >
               <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <p className="text-sm text-gray-600 mb-2">
-                Drag and drop files here, or click to browse
+                {t('documents.dragAndDrop')}
               </p>
-              <p className="text-xs text-gray-400 mb-4">Maximum file size: 10MB</p>
+              <p className="text-xs text-gray-400 mb-4">{t('documents.maxFileSize')}</p>
               
               <label className="inline-flex items-center px-6 py-3 bg-brand-navy hover:bg-brand-slate text-white rounded-lg cursor-pointer transition-colors">
                 <Upload className="w-4 h-4 mr-2" />
-                Choose Files
+                {t('documents.chooseFiles')}
                 <input
                   type="file"
                   multiple
@@ -145,13 +153,13 @@ const Documents = () => {
           {/* Documents List */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-serif font-bold text-brand-navy mb-4">
-              All Documents ({documents.length})
+              {t('documents.allDocuments')} ({documents.length})
             </h2>
 
             {documents.length === 0 ? (
               <div className="text-center py-12">
                 <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">No documents uploaded yet</p>
+                <p className="text-gray-500">{t('documents.noDocuments')}</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -189,7 +197,7 @@ const Documents = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Download"
+                        title={t('documents.download')}
                       >
                         <Download className="w-4 h-4 text-gray-600" />
                       </a>
@@ -200,7 +208,7 @@ const Documents = () => {
                           }
                         }}
                         className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete"
+                        title={t('common.delete')}
                       >
                         <Trash2 className="w-4 h-4 text-red-600" />
                       </button>

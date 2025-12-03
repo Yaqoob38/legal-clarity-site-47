@@ -57,6 +57,19 @@ const Dashboard = () => {
     return t(`status.${status}`) || status.replace(/_/g, " ");
   };
 
+  // Helper to translate task title
+  const translateTaskTitle = (title: string) => {
+    const translated = t(`task.${title}`);
+    return translated !== `task.${title}` ? translated : title;
+  };
+
+  // Helper to translate task description
+  const translateTaskDesc = (desc: string | null) => {
+    if (!desc) return null;
+    const translated = t(`taskDesc.${desc}`);
+    return translated !== `taskDesc.${desc}` ? translated : desc;
+  };
+
   return (
     <div className="bg-brand-gray font-sans text-brand-navy antialiased h-screen flex overflow-hidden">
       {/* Sidebar Navigation */}
@@ -134,7 +147,7 @@ const Dashboard = () => {
               >
                 <div>
                   <span className="text-xs font-bold text-brand-gold uppercase tracking-widest block mb-1">{t('dashboard.nextTask')}</span>
-                  <span className="text-sm font-bold text-brand-navy block">{nextTask?.title || t('dashboard.allTasksComplete')}</span>
+                  <span className="text-sm font-bold text-brand-navy block">{nextTask ? translateTaskTitle(nextTask.title) : t('dashboard.allTasksComplete')}</span>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                   <ArrowRight className="w-4 h-4 text-brand-gold" />
@@ -204,9 +217,9 @@ const Dashboard = () => {
                         <UploadCloud className="w-4 h-4 text-gray-400" />
                       )}
                     </div>
-                    <h3 className="text-sm font-bold text-brand-navy mb-1">{task.title}</h3>
+                    <h3 className="text-sm font-bold text-brand-navy mb-1">{translateTaskTitle(task.title)}</h3>
                     {task.description && (
-                      <p className="text-xs text-gray-500 line-clamp-2">{task.description}</p>
+                      <p className="text-xs text-gray-500 line-clamp-2">{translateTaskDesc(task.description)}</p>
                     )}
                     {task.status === "COMPLETE" && (
                       <p className="text-xs text-gray-400 mt-2">{t('dashboard.completed')}</p>
@@ -242,9 +255,9 @@ const Dashboard = () => {
                         {translateStatus(task.status)}
                       </span>
                     </div>
-                    <h3 className="text-sm font-bold text-brand-navy mb-1">{task.title}</h3>
+                    <h3 className="text-sm font-bold text-brand-navy mb-1">{translateTaskTitle(task.title)}</h3>
                     {task.description && (
-                      <p className="text-xs text-gray-500 line-clamp-2">{task.description}</p>
+                      <p className="text-xs text-gray-500 line-clamp-2">{translateTaskDesc(task.description)}</p>
                     )}
                   </div>
                 ))}
@@ -277,9 +290,9 @@ const Dashboard = () => {
                           {translateStatus(task.status)}
                         </span>
                       </div>
-                      <h3 className="text-sm font-bold text-brand-navy mb-1">{task.title}</h3>
+                      <h3 className="text-sm font-bold text-brand-navy mb-1">{translateTaskTitle(task.title)}</h3>
                       {task.description && (
-                        <p className="text-xs text-gray-500 line-clamp-2">{task.description}</p>
+                        <p className="text-xs text-gray-500 line-clamp-2">{translateTaskDesc(task.description)}</p>
                       )}
                     </div>
                   ))
